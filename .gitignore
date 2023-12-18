@@ -4,3 +4,6 @@
 
 /.vs
 /API/.vs
+
+/API/BackupSystem/bin/Debug/net7.0
+/API/BackupSystem/obj
