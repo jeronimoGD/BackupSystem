@@ -1,5 +1,6 @@
 using BackupSystem.ApplicationSettings;
 using BackupSystem.Common.Hubs;
+using BackupSystem.Common.Interfaces.Hubs;
 using BackupSystem.Common.Interfaces.Repository;
 using BackupSystem.Common.Interfaces.Services;
 using BackupSystem.Common.Mappings;
@@ -14,6 +15,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -103,6 +105,11 @@ builder.Services.AddAutoMapper(typeof(MappingProfile));
 // Inject SignalR
 builder.Services.AddSignalR();
 
+// Inject SignalRConnectionManager
+builder.Services.AddSingleton<ISignalRConnectionManager, SignalRConnectionManager>();
+builder.Services.AddSingleton<ICheckAliveTimeoutsManager, CheckAliveTimeoutsManager>();
+builder.Services.AddTransient<IAgentConfigurationHubService, AgentConfigurationHubService>();
+
 var app = builder.Build();
 
 
@@ -135,4 +142,27 @@ app.MapHub<AgentConfigurationHub>("/agentConfigurationHub");
 
 app.MapControllers();
 
+InitialConfiguration(app, app.Environment);
+
 app.Run();
+
+void InitialConfiguration(IApplicationBuilder app, IWebHostEnvironment env)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+    else
+    {
+        // Configuraciones de producción...
+    }
+
+    InitialDbOperations(app);
+}
+
+void InitialDbOperations(IApplicationBuilder app)
+{
+    var serviceScope = app.ApplicationServices.CreateScope();
+    var agentsService = serviceScope.ServiceProvider.GetRequiredService<IAgentsService>();
+    agentsService.SetAllOnlineStatus(false);
+}
