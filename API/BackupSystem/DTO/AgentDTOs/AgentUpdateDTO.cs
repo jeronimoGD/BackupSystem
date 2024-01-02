@@ -15,6 +15,6 @@ namespace BackupSystem.DTO.AgentDTOs
         [Required]
         public string AgentName { get; set; }
         [Required]
-        public Guid ConnectionKey { get; set; }
+        public Guid AgentKey { get; set; }
     }
 }

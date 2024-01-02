@@ -9,6 +9,9 @@ namespace BackupSystem.DTO.BackUpConfigurationDTOs
     {
         [Required]
         public string ConfigurationName { get; set; }
+
+        [Required]
+        public Guid AgentId { get; set; }
         public string TarjetDbName { get; set; }
         public string PeriodicBackUpType { get; set; } // None, Daily, Bi-Week, Monthly
         [Required]

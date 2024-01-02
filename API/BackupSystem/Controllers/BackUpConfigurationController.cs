@@ -1,10 +1,15 @@
 ﻿using AutoMapper;
 using BackupSystem.Common.Hubs;
+using BackupSystem.Common.Interfaces.Hubs;
 using BackupSystem.Common.Interfaces.Services;
+using BackupSystem.Common.Services;
 using BackupSystem.Controllers.AplicationResponse;
+using BackupSystem.Data.Entities;
 using BackupSystem.DTO.BackUpConfigurationDTOs;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.Extensions.Logging;
 
 namespace BackupSystem.Controllers
 {
@@ -13,15 +18,18 @@ namespace BackupSystem.Controllers
     public class BackUpConfigurationController : ControllerBase
     {
         private readonly IBackUpConfigurationService _backUpConfigurationService;
+        private readonly IAgentsService _agentService;
         private APIResponse _response;
         private readonly IMapper _mapper;
-        private IHubContext<AgentConfigurationHub> _hubContex;
-        public BackUpConfigurationController(IMapper mapper, IBackUpConfigurationService backUpConfigurationService, IHubContext<AgentConfigurationHub> hubContex)
+        private IAgentConfigurationHubService _agentConfigurationHubService;
+
+        public BackUpConfigurationController(IMapper mapper, IBackUpConfigurationService backUpConfigurationService, IAgentsService agentService, IAgentConfigurationHubService agentConfigurationHubService)
         {
             _response = new APIResponse();
             _mapper = mapper;
             _backUpConfigurationService = backUpConfigurationService;
-            _hubContex = hubContex;
+            _agentService = agentService;
+            _agentConfigurationHubService = agentConfigurationHubService;
         }
 
         [HttpGet("GetBackUpConfigurations", Name = "GetBackUpConfigurations")]
@@ -30,11 +38,9 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> getBackUpConfigurations()
+        public async Task<IActionResult> GetBackUpConfigurations()
         {
-            _response = await _backUpConfigurationService.GetAll();
-
-            _hubContex.Clients.All.SendAsync("ReceiveConfiguration", "Here you have your configuration");
+            _response = await _backUpConfigurationService.Get();
             return MapToActionResult(this, _response);
         }
 
@@ -47,7 +53,7 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetBackUpConfiguration(string name)
         {
-            _response = await _backUpConfigurationService.Get(a => a.ConfigurationName == name);
+            _response = await _backUpConfigurationService.Get(a => a.ConfigurationName == name, true, 1);
             return MapToActionResult(this, _response);
         }
 
@@ -59,6 +65,13 @@ namespace BackupSystem.Controllers
         public async Task<IActionResult> AddBackUpConfiguration([FromForm] BackUpConfigurationCreateDTO createDTO)
         {
             _response = await _backUpConfigurationService.Add(createDTO, bc => bc.ConfigurationName == createDTO.ConfigurationName);
+            
+            if (_response.IsSuccesful)
+            {
+                Agent agent = await _agentService.GetSingle(a => a.AgentKey == createDTO.AgentId);
+                _agentConfigurationHubService.NotifyNewConfiguration(agent.AgentKey, createDTO.ConfigurationName);
+            }
+
             return MapToActionResult(this, _response);
         }
 

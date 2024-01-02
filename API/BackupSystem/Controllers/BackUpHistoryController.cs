@@ -33,7 +33,7 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetBackUpHistorys()
         {
-            _response = await _backUpHistoryService.GetAll();
+            _response = await _backUpHistoryService.Get();
             return MapToActionResult(this, _response);
         }
 

@@ -14,7 +14,7 @@ namespace BackupSystem.DTO.BackUpHistoryDTO
     {
         [Required]
         public string BackUpName { get; set; }
-        public string BackUpSize { get; set; }
+        public string BackUpSizeInMB { get; set; }
         public bool AvailableToDownload { get; set; }
     }
 }

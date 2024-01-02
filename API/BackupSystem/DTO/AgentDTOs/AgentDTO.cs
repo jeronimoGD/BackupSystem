@@ -1,5 +1,6 @@
 ﻿using BackupSystem.Common.Interfaces.Mapping;
 using BackupSystem.Data.Entities;
+using BackupSystem.DTO.GenericDTOs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -9,12 +10,11 @@ using System.Threading.Tasks;
 
 namespace BackupSystem.DTO.AgentDTOs
 {
-    public class AgentDTO : IMapFrom<Agent>
+    public class AgentDTO : GenericDTO, IMapFrom<Agent>
     {
-
         [Required]
         public string AgentName { get; set; }
         [Required]
-        public Guid ConnectionKey { get; set; }
+        public Guid AgentKey { get; set; }
     }
 }

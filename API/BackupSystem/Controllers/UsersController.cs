@@ -37,7 +37,7 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetUsers()
         {
-            _response = await _userService.GetAll();
+            _response = await _userService.Get();
             return MapToActionResult(this, _response);
         }
 

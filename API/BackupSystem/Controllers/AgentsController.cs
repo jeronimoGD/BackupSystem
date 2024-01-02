@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using BackupSystem.Common.Constants;
 using BackupSystem.Common.Interfaces.Repository;
 using BackupSystem.Common.Interfaces.Services;
@@ -39,7 +40,7 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAgents()
         {
-            _response = await _agentService.GetAll();
+            _response = await _agentService.Get(null, true, 0, a => a.BackUpConfigurations);
             return MapToActionResult(this, _response);
         }
 
@@ -50,9 +51,9 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAgentById()
+        public async Task<IActionResult> GetOnlineAgents()
         {
-            _response = await _agentService.GetOnlineAgents();
+            _response = await _agentService.Get(a => a.IsOnline == true, true, 0, a => a.BackUpConfigurations);
             return MapToActionResult(this, _response);
         }
 
@@ -65,7 +66,20 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetAgentByName(string name)
         {
-            _response = await _agentService.Get(a => a.AgentName == name);
+            _response = await _agentService.Get(a => a.AgentName == name, true, 0, a => a.BackUpConfigurations);
+            return MapToActionResult(this, _response);
+        }
+
+        [HttpGet("GetBackUpConfigurationByAgent", Name = "GetBackUpConfigurationByAgent")]
+        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetBackUpConfigurationByAgent(Guid connectionKey)
+        {
+            _response = await _agentService.GetAgentBackUpConfiguration(connectionKey);
             return MapToActionResult(this, _response);
         }
 
@@ -103,6 +117,19 @@ namespace BackupSystem.Controllers
         public async Task<IActionResult> UpdateAgent(string name, AgentUpdateDTO updateDTO)
         {
             _response = await _agentService.Update(updateDTO, u => u.AgentName == name);
+            return MapToActionResult(this, _response);
+        }
+
+        [HttpGet("GetAuthorizationToConnect", Name = "GetAuthorizationToConnect")]
+        // [Authorize(Roles = DefaultRoles.Admin)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetAuthorizationToConnect(Guid connectionKey)
+        {
+            _response = await _agentService.IsAuthorized(connectionKey);
             return MapToActionResult(this, _response);
         }
     }
