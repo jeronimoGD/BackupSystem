@@ -12,7 +12,7 @@ namespace BackupSystem.Data.Entities
         public int Id { get; set; }
         [Required]
         public string BackUpName { get; set; }
-        public string BackUpSize { get; set; }
+        public string BackUpSizeInMB { get; set; }
         public DateTime BuckUpDate { get; set; }
         public bool AvailableToDownload { get; set; }
     }

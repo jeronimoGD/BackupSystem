@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BackupSystem.Data.Entities
 {
@@ -11,7 +12,9 @@ namespace BackupSystem.Data.Entities
         [Required]
         public string ConfigurationName { get; set; }
         public string TarjetDbName { get; set; }
-        public string PeriodicBackUpType { get; set; } // None, Daily, Bi-Week, Monthly
+        [EnumDataType(typeof(Periodicity), ErrorMessage = "Invalid periodicity, please select between these options (Daily, Weekly, Biweekl, Monthly)")]
+        public Periodicity Periodicity { get; set; }
+
         [Required]
         public bool CleanEventTables { get; set; }
         [Required]
@@ -19,5 +22,16 @@ namespace BackupSystem.Data.Entities
         [Required]
         public bool StoreLastNBackUps { get; set; }
         public int LastNBackUps { get; set; }
+
+        [ForeignKey("AgentId")]
+        public Guid AgentId { get; set; }
+    }
+
+    public enum Periodicity
+    {
+        Daily,
+        Weekly,
+        TwoWeeks,
+        Monthly
     }
 }
