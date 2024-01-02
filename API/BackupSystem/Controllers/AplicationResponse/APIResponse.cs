@@ -13,6 +13,7 @@ namespace BackupSystem.Controllers.AplicationResponse
         {
             StatusCode = HttpStatusCode.OK;
             IsSuccesful = true;
+            ErrorMessages = string.Empty;
         }
 
         public APIResponse(HttpStatusCode statusCode, bool isSuccesful, string errorMessages, object result)
@@ -53,6 +54,11 @@ namespace BackupSystem.Controllers.AplicationResponse
         public static APIResponse InternalServerError(string errorMessages)
         {
             return new APIResponse { StatusCode = HttpStatusCode.InternalServerError, IsSuccesful = false, Result = null, ErrorMessages = errorMessages };
+        }
+
+        public static implicit operator APIResponse(bool v)
+        {
+            throw new NotImplementedException();
         }
     }
 }

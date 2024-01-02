@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure;
 using BackupSystem.ApplicationSettings;
 using BackupSystem.Common.Interfaces.Repository;
 using BackupSystem.Common.Interfaces.Services;
@@ -37,7 +38,8 @@ namespace BackupSystem.Common.Services
                 if (!await DoesEntityExists(a => a.AgentName == createDto.AgentName))
                 {
                     Agent newAgentData = _mapper.Map<Agent>(createDto);
-                    newAgentData.ConnectionKey = Guid.NewGuid();
+                    newAgentData.AgentKey = Guid.NewGuid();
+                    newAgentData.BackUpConfigurations = new List<BackUpConfiguration>();
                     await _unitOfWork.Agents.Create(newAgentData);
                     response = APIResponse.Ok(_mapper.Map<AgentDTO>(newAgentData));
                 }
@@ -54,10 +56,119 @@ namespace BackupSystem.Common.Services
             return response;
         }
 
-        public Task<APIResponse> GetOnlineAgents()
+        public async Task<APIResponse> IsAuthorized(Guid ConnectionKey)
         {
-            // TODO: Implement logic to know all the online agents
-            throw new NotImplementedException();
+            APIResponse response = new APIResponse();
+
+            try
+            {
+                var agent = await GetSingle(u => u.AgentKey == ConnectionKey);
+                if (agent != null)
+                {
+                    if (agent.IsOnline == false)
+                    {
+                        response = APIResponse.Ok(agent);
+                    }
+                    else
+                    {
+                        response = APIResponse.BadRequest(agent, $"Agent with this key is already connected");
+                    }
+                }
+                else
+                {
+                    response = APIResponse.NotFound($"Agent with this key does not xist in the system.");
+                }
+            }
+            catch (Exception e)
+            {
+                response = APIResponse.InternalServerError(e.ToString());
+            }
+
+            return response;
+
+
+        }
+        public async Task<APIResponse> SetOnlineStatus(Guid connectionKey, bool isOnline)
+        {
+            APIResponse response = new APIResponse();
+            try
+            {
+
+                var agent = await GetSingle(a => a.AgentKey == connectionKey, true, a => a.BackUpConfigurations);
+
+                if (agent != null)
+                {
+                    agent.IsOnline = isOnline;
+                    await Update(agent);
+                    response = APIResponse.Ok(agent);
+                }
+                else
+                {
+                    response = APIResponse.NotFound($"Agent with this key does not xist in the system.");
+                }
+            }
+            catch (Exception e)
+            {
+                response = APIResponse.InternalServerError(e.ToString());
+            }
+
+            return response;
+        }
+
+        public async Task<APIResponse> SetAllOnlineStatus(bool isOnline)
+        {
+            APIResponse response = new APIResponse();
+            try
+            {
+
+                var agents = await _unitOfWork.Agents.Get();
+
+                if (agents != null)
+                {
+                    foreach (var agent in agents)
+                    {
+                        agent.IsOnline = isOnline;
+                        await Update(agent);
+                    }
+
+                    response = APIResponse.Ok(agents);
+                }
+                else
+                {
+                    response = APIResponse.NotFound($"No agents found.");
+                }
+            }
+            catch (Exception e)
+            {
+                response = APIResponse.InternalServerError(e.ToString());
+            }
+
+            return response;
+        }
+
+        public async Task<APIResponse> GetAgentBackUpConfiguration(Guid ConnectionKey)
+        {
+            APIResponse response = new APIResponse();
+
+            try
+            {
+                var agent = await GetSingle(u => u.AgentKey == ConnectionKey, true, a => a.BackUpConfigurations);
+
+                if (agent != null)
+                {
+                    response = APIResponse.Ok(agent.BackUpConfigurations);
+                }
+                else
+                {
+                    response = APIResponse.NotFound($"Agent with this key does not xist in the system.");
+                }
+            }
+            catch (Exception e)
+            {
+                response = APIResponse.InternalServerError(e.ToString());
+            }
+
+            return response;
         }
     }
 }

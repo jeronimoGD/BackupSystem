@@ -1,7 +1,11 @@
 ﻿using BackupSystem.Common.Interfaces.Repository;
 using BackupSystem.Data;
+using BackupSystem.Data.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace BackupSystem.Common.Repository
 {
@@ -16,7 +20,7 @@ namespace BackupSystem.Common.Repository
             _dbSet = _dbContext.Set<TEntity>();
         }
 
-        public async Task<TEntity> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true)
+        public async Task<List<TEntity>> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0, params Expression<Func<TEntity, object>>[] includes)
         {
             IQueryable<TEntity> query = _dbSet;
 
@@ -30,20 +34,18 @@ namespace BackupSystem.Common.Repository
                 query = query.Where(filtro);
             }
 
-            return await query.FirstOrDefaultAsync();
-        }
-
-        public async Task<List<TEntity>> GetAll(Expression<Func<TEntity, bool>> filtro = null)
-        {
-            IQueryable<TEntity> query = _dbSet;
-            if (filtro != null)
+            if (includes.Count() > 0)
             {
-                query = query.Where(filtro);
+                query = includes.Aggregate(query, (current, includeProperty) => current.Include(includeProperty));
+            }
+
+            if (amountOfEntities > 0)
+            {
+                query = query.Take(amountOfEntities);
             }
 
             return await query.ToListAsync();
         }
-
 
         public async Task Create(TEntity entity)
         {

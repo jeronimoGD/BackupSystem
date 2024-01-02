@@ -8,6 +8,7 @@ using BackupSystem.DTO.AgentDTOs;
 using BackupSystem.DTO.GenericDTOs;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Formats.Tar;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -38,17 +39,24 @@ namespace BackupSystem.Common.Services
             _mapper = mapper;
         }
 
-        public async Task<APIResponse> GetAll()
+        public async Task<APIResponse> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0,  params Expression<Func<TEntity, object>>[] includes)
         {
             APIResponse response = new APIResponse();
 
             try
             {
-                IEnumerable<object> users = await _repository.GetAll();
+                IEnumerable<TEntity> entities = await _repository.Get(filtro, tracked, amountOfEntities,includes);
 
-                if (users != null && users.Count() > 0)
+                if (entities != null && entities.Count() > 0)
                 {
-                    response = APIResponse.Ok(users);
+                    if (amountOfEntities == 1)
+                    {
+                        response = APIResponse.Ok(entities.FirstOrDefault());
+                    }
+                    else
+                    {
+                        response = APIResponse.Ok(entities);
+                    }
                 }
                 else
                 {
@@ -63,47 +71,27 @@ namespace BackupSystem.Common.Services
             return response;
         }
 
+        public async Task<TEntity> GetSingle(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, params Expression<Func<TEntity, object>>[] includes)
+        {
+            IEnumerable<TEntity> entities = await _repository.Get(filtro, tracked, 1,includes);
+            return entities.FirstOrDefault();
+        }
+
         public async Task<APIResponse> Delete(Expression<Func<TEntity, bool>> filtro)
         {
             APIResponse response = new APIResponse();
 
             try
             {
-                var userToDelete = await _repository.Get(filtro);
-
-                if (userToDelete != null)
+                var entityToDelete = await GetSingle(filtro);
+                if (entityToDelete != null)
                 {
-                    await _repository.Delete(userToDelete);
+                    await _repository.Delete(entityToDelete);
                     response = APIResponse.NoContent();
                 }
                 else
                 {
                     response = APIResponse.NotFound($"Not found");
-                }
-            }
-            catch (Exception e)
-            {
-                response = APIResponse.InternalServerError(e.ToString());
-            }
-
-            return response;
-        }
-
-        public async Task<APIResponse> Get(Expression<Func<TEntity, bool>> filtro)
-        {
-            APIResponse response = new APIResponse();
-
-            try
-            {
-                var usrByName = await _repository.Get(filtro);
-
-                if (usrByName != null)
-                {
-                    response = APIResponse.Ok(usrByName);
-                }
-                else
-                {
-                    response = APIResponse.NotFound($"Not found.");
                 }
             }
             catch (Exception e)
@@ -147,13 +135,14 @@ namespace BackupSystem.Common.Services
 
             return response;
         }
-        public async Task<APIResponse> Add(GenericCreateDTO createDTO, Expression<Func<TEntity, bool>> checkIfEntityExistsFilter)
+
+        public async Task<APIResponse> Add(GenericCreateDTO createDTO, Expression<Func<TEntity, bool>> filtro)
         {
             APIResponse response = new APIResponse();
 
             try
             {
-                if(!await DoesEntityExists(checkIfEntityExistsFilter))
+                if(!await DoesEntityExists(filtro))
                 {
                     TEntity newEntity = _mapper.Map<TEntity>(createDTO);
                     await _repository.Create(newEntity);
@@ -173,19 +162,18 @@ namespace BackupSystem.Common.Services
             return response;
         }
 
-        public async Task<APIResponse> Update(GenericUpdateDTO updateDTO, Expression<Func<TEntity, bool>> checkIfEntityExistsFilter)
+        public async Task<APIResponse> Update(GenericUpdateDTO updateDTO, Expression<Func<TEntity, bool>> filtro)
         {
             APIResponse response = new APIResponse();
 
             try
             {
-                var userToUpdate = await _repository.Get(checkIfEntityExistsFilter, false);
-
-                if (userToUpdate != null)
+                var entityToUpdate = await GetSingle(filtro, false);
+                if (entityToUpdate != null)
                 {
                     TEntity newEntityData = _mapper.Map<TEntity>(updateDTO);
-                    PropertyInfo idProperty = userToUpdate.GetType().GetProperty("Id");
-                    newEntityData.GetType().GetProperty("Id")?.SetValue(newEntityData, idProperty.GetValue(userToUpdate));
+                    PropertyInfo idProperty = entityToUpdate.GetType().GetProperty("Id");
+                    newEntityData.GetType().GetProperty("Id")?.SetValue(newEntityData, idProperty.GetValue(entityToUpdate));
                     await _repository.Update(newEntityData);
                     response = APIResponse.Ok(newEntityData);
                 }
@@ -204,7 +192,7 @@ namespace BackupSystem.Common.Services
 
         public async Task<bool> DoesEntityExists(Expression<Func<TEntity, bool>> filtro = null)
         {
-            return await _repository.Get(filtro) != null;
+            return await this.GetSingle(filtro) != null;
         }
     }
 }

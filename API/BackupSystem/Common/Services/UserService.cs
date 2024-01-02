@@ -75,7 +75,7 @@ namespace BackupSystem.Common.Services
 
             try
             {
-                var userToUpdate = await _unitOfWork.ApplicationUsers.Get(filtro);
+                var userToUpdate = (await _unitOfWork.ApplicationUsers.Get(filtro)).FirstOrDefault();
 
                 if (userToUpdate != null)
                 {

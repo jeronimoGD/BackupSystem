@@ -11,7 +11,10 @@ namespace BackupSystem.Common.Interfaces.Services
 {
     public interface IAgentsService : IBaseEntityService<Agent>
     {
-        Task<APIResponse> GetOnlineAgents();
         Task<APIResponse> AddAgent(AgentCreateDTO createDto);
+        Task<APIResponse> IsAuthorized(Guid ConnectionKey);
+        Task<APIResponse> SetOnlineStatus(Guid connectionKey, bool isOnline);
+        Task<APIResponse> SetAllOnlineStatus(bool isOnline);
+        Task<APIResponse> GetAgentBackUpConfiguration(Guid ConnectionKey);
     }
 }
