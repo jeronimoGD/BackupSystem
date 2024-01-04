@@ -4,6 +4,7 @@ using BackUpAgent.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BackUpAgent.Migrations
 {
     [DbContext(typeof(BackUpSystemDbContext))]
-    partial class BackUpSystemDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240103120324_AddExcludedTablesInConfiguration")]
+    partial class AddExcludedTablesInConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,9 +41,10 @@ namespace BackUpAgent.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("ExcludedTablesJsonList")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("LastNBackUps")
+                    b.Property<int>("LastNBackUps")
                         .HasColumnType("int");
 
                     b.Property<int>("Periodicity")
@@ -80,22 +84,12 @@ namespace BackUpAgent.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
-                    b.Property<string>("BackUpPath")
+                    b.Property<string>("BackUpSizeInMB")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<double>("BackUpSizeInMB")
-                        .HasColumnType("float");
 
                     b.Property<DateTime>("BuckUpDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsSuccessfull")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 

@@ -12,14 +12,16 @@ namespace BackupSystem.DTO.BackUpConfigurationDTOs
 
         [Required]
         public Guid AgentId { get; set; }
-        public string TarjetDbName { get; set; }
-        public string PeriodicBackUpType { get; set; } // None, Daily, Bi-Week, Monthly
         [Required]
-        public bool CleanEventTables { get; set; }
+        public string TarjetDbName { get; set; }
+        [Required]
+        public string SourceDbName { get; set; }
+        public string PeriodicBackUpType { get; set; } // None, Daily, Bi-Week, Monthly
         [Required]
         public bool CreateCloudBackUp { get; set; }
         [Required]
         public bool StoreLastNBackUps { get; set; }
-        public int LastNBackUps { get; set; }
+        public int? LastNBackUps { get; set; }
+        public List<string>? ExcludedTablesList { get; set; }
     }
 }

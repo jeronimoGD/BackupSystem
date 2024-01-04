@@ -7,6 +7,7 @@ using BackupSystem.DTO.BackUpConfigurationDTOs;
 using BackupSystem.DTO.BackUpHistoryDTO;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Linq.Expressions;
+using Newtonsoft.Json;
 
 namespace BackupSystem.Common.Services
 {
@@ -19,6 +20,32 @@ namespace BackupSystem.Common.Services
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+        }
+
+        public async Task<APIResponse> AddBackUpConfiguration(BackUpConfigurationCreateDTO createDto)
+        {
+            APIResponse response = new APIResponse();
+
+            try
+            {
+                if (!await DoesEntityExists(a => a.ConfigurationName == createDto.ConfigurationName))
+                {
+                    BackUpConfiguration newBackUpConf = _mapper.Map<BackUpConfiguration>(createDto);
+                    newBackUpConf.ExcludedTablesJsonList = JsonConvert.SerializeObject(createDto.ExcludedTablesList);
+                    await _unitOfWork.BackUpConfigurations.Create(newBackUpConf);
+                    response = APIResponse.Ok(newBackUpConf);
+                }
+                else
+                {
+                    response = APIResponse.NotFound($"BackUp configuration with this name already exists");
+                }
+            }
+            catch (Exception e)
+            {
+                response = APIResponse.InternalServerError(e.ToString());
+            }
+
+            return response;
         }
     }
 }

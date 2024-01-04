@@ -9,5 +9,7 @@ namespace BackupSystem.Common.Interfaces.Services
 {
     public interface IBackUpConfigurationService : IBaseEntityService<BackUpConfiguration>
     {
+        Task<APIResponse> AddBackUpConfiguration(BackUpConfigurationCreateDTO createDto);
+
     }
 }

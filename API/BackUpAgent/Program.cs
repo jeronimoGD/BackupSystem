@@ -7,6 +7,7 @@ using BackUpAgent.Common.Interfaces.Repository;
 using BackUpAgent.Common.Interfaces.ScheduledTasks;
 using BackUpAgent.Common.Interfaces.SignalR;
 using BackUpAgent.Common.Interfaces.Utils;
+using BackUpAgent.Common.Mappings;
 using BackUpAgent.Common.Services;
 using BackUpAgent.Common.Services.BuckUpManaging;
 using BackUpAgent.Common.Services.DbServices;
@@ -61,9 +62,13 @@ internal class Program
                         // Inject Unit Of Work
                         services.AddScoped<IUnitOfWork, UnitOfWork>();
                         services.AddTransient<IBackUpConfigurationService, BackUpConfigurationService>();
+                        services.AddTransient<IBackUpHistoryService, BackUpHistoryService>();
 
                         // Utils
                         services.AddTransient<IUtils, Utils>();
+
+                        // Auto Mapper
+                        services.AddAutoMapper(typeof(MappingProfile));
 
                     })
                     .Build();

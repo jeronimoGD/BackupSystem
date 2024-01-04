@@ -64,7 +64,7 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> AddBackUpConfiguration([FromForm] BackUpConfigurationCreateDTO createDTO)
         {
-            _response = await _backUpConfigurationService.Add(createDTO, bc => bc.ConfigurationName == createDTO.ConfigurationName);
+            _response = await _backUpConfigurationService.AddBackUpConfiguration(createDTO);
             
             if (_response.IsSuccesful)
             {

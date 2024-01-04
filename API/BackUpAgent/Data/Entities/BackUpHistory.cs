@@ -12,8 +12,12 @@ namespace BackUpAgent.Data.Entities
         public int Id { get; set; }
         [Required]
         public string BackUpName { get; set; }
-        public string BackUpSizeInMB { get; set; }
+        public string BackUpPath { get; set; }
+        public bool IsSuccessfull { get; set; }
+        public double BackUpSizeInMB { get; set; }
+        [Required]
         public DateTime BuckUpDate { get; set; }
         public bool AvailableToDownload { get; set; }
+        public string Description { get; set; }
     }
 }

@@ -68,6 +68,10 @@ namespace BackUpAgent.Common.Services
                 {
                     var apiContent = await apiResponse.Content.ReadAsStringAsync();
                     response = JsonConvert.DeserializeObject<APIResponse>(apiContent);
+                    response.StatusCode = apiResponse.StatusCode;
+                    response.IsSuccesful = apiResponse.IsSuccessStatusCode;
+                    response.ErrorMessages= apiResponse.Headers.ToString();
+
                 }
             }
             catch (Exception ex)

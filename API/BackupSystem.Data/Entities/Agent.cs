@@ -16,5 +16,6 @@ namespace BackupSystem.Data.Entities
         [Required]
         public bool IsOnline { get; set; }
         public ICollection<BackUpConfiguration> BackUpConfigurations { get; set; }
-     }
+        public ICollection<BackUpHistory> BackUpHistoryRecords{ get; set; }
+    }
 }

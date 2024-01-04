@@ -55,7 +55,7 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddBackUpHistory([FromForm] BackUpHistoryCreateDTO createDTO)
+        public async Task<IActionResult> AddBackUpHistory([FromBody] BackUpHistoryCreateDTO createDTO)
         {
             _response = await _backUpHistoryService.AddConfigurationHistoryRecord(createDTO);
             return MapToActionResult(this, _response);
