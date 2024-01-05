@@ -20,8 +20,7 @@ namespace BackUpAgent.Data.Entities
         [Required]
         public bool CreateCloudBackUp { get; set; }
         [Required]
-        public bool StoreLastNBackUps { get; set; }
-        public int? LastNBackUps { get; set; }
+        public int LastNBackUpsToStore { get; set; }
         public string? ExcludedTablesJsonList { get; set; }
     }
 }

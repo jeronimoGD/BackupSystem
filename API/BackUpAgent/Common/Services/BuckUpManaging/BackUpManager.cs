@@ -1,8 +1,10 @@
 ﻿using BackUpAgent.Common.Interfaces.BackUpManaging;
 using BackUpAgent.Common.Interfaces.NewFolder;
+using BackUpAgent.Common.Interfaces.Utils;
 using BackUpAgent.Data.Entities;
 using Microsoft.Data.SqlClient;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.VisualBasic;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,17 +13,24 @@ using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace BackUpAgent.Common.Services.BuckUpManaging
 {
     public class BackUpManager : IBackUpManager
     {
+        private readonly IUtils _utils;
+
+        public BackUpManager(IUtils utils)
+        {
+            _utils = utils;
+        }
 
         public async Task<BackUpHistory> DoBackUp(BackUpConfiguration conf)
         {
-
-            string backUpName = $"{conf.TarjetDbName}_{DateTime.Now.ToString("dd-MM-yyyy_HH-mm-ss")}";
+            string dateFormat = "dd-MM-yyyy_HH-mm-ss";
+            string backUpName = $"{conf.TarjetDbName}_{DateTime.Now.ToString(dateFormat)}";
             string connectionString = $"Server=B258LSL; Database={conf.SourceDbName}; TrustServerCertificate=true; Trusted_Connection=true; MultipleActiveResultSets=true";
             string originDatabaseName = conf.SourceDbName;
             string excludedTablesSqlFormat = "";
@@ -32,6 +41,7 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
                 BackUpSizeInMB = 0,
                 BuckUpDate =  DateTime.UtcNow,
                 BackUpName = backUpName,
+                BackUpPath = "",
                 AvailableToDownload = false
             };
 
@@ -39,17 +49,17 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
             {
                 if (conf.ExcludedTablesJsonList != string.Empty && conf.ExcludedTablesJsonList != null)
                 {
-                    excludedTablesSqlFormat = string.Join(",", JsonConvert.DeserializeObject<List<string>>(conf.ExcludedTablesJsonList));
+                    // excludedTablesSqlFormat = string.Join(",", JsonConvert.DeserializeObject<List<string>>(conf.ExcludedTablesJsonList));
                 }
 
                 string backUpsFolder = "Backups";
-                string rutaDirectorioBackups = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, backUpsFolder);
+                string targetDirectoryPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, backUpsFolder, conf.ConfigurationName);
 
-                if (!Directory.Exists(rutaDirectorioBackups))
+                if (!Directory.Exists(targetDirectoryPath))
                 {
                     try
                     {
-                        Directory.CreateDirectory(rutaDirectorioBackups);
+                        Directory.CreateDirectory(targetDirectoryPath);
                     }
                     catch (Exception ex)
                     {
@@ -58,7 +68,7 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
                     }
                 }
 
-                string backupPath = Path.Combine(rutaDirectorioBackups, $"{backUpName}.bak");
+                string backupPath = Path.Combine(targetDirectoryPath, $"{backUpName}.bak");
 
                 string backupCommandText = $@"
                 BACKUP DATABASE @DatabaseName  TO DISK = @BackupPath 
@@ -83,9 +93,12 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
                 Console.WriteLine($"Back up finished succesfully at: {backupPath}");
                 backUpRecord.IsSuccessfull = true;
                 backUpRecord.BackUpPath = backupPath;
-                backUpRecord.BackUpSizeInMB = CalculateBackupSize(backupPath);
+                backUpRecord.BackUpSizeInMB = _utils.CalculateFileSizeInMB(backupPath);
                 backUpRecord.Description = "Back up finished succesfully!";
 
+                // string regexPattern = $"{Regex.Escape(conf.TarjetDbName)}_{Regex.Escape(dateFormat)}.{Regex.Escape("bak")}";
+                string regexPattern = $"{Regex.Escape(conf.TarjetDbName)}_\\.?";
+                _utils.DeleteOldFilesKeepingN(targetDirectoryPath, backUpName, regexPattern, conf.LastNBackUpsToStore);
                 // TODO: set if avaibale to download when online back ups are developed
             }
             catch (Exception e)
@@ -97,16 +110,7 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
             return backUpRecord;
         }
 
-        static double CalculateBackupSize(string backUpPath)
-        {
-            double size = 0;
-            if (File.Exists(backUpPath))
-            {
-                FileInfo fileInfo = new FileInfo(backUpPath);
-                size = (double)fileInfo.Length / (1024 * 1024);
-            }
 
-            return size;
-        }
+       
     }
 }

@@ -20,8 +20,7 @@ namespace BackupSystem.DTO.BackUpConfigurationDTOs
         [Required]
         public bool CreateCloudBackUp { get; set; }
         [Required]
-        public bool StoreLastNBackUps { get; set; }
-        public int? LastNBackUps { get; set; }
+        public int LastNBackUpsToStore { get; set; }
         public List<string>? ExcludedTablesList { get; set; }
     }
 

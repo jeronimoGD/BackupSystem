@@ -26,6 +26,7 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
         private readonly IBackUpManager _backUpManager;
         private readonly IServiceProvider _serviceProvider;
         private readonly IUtils _utils;
+
         public BackUpScheduler(IBackUpManager backUpManager, IUtils utils, IServiceProvider serviceProvider)
         {
             _backUpManager = backUpManager;
@@ -53,8 +54,8 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
             var timer = new Timer(
                 state => BackUpTimersCallbackAsync((BackUpTimerCallbackParams)state), 
                 new BackUpTimerCallbackParams { BackUpConfig = configuration},
-                TimeSpan.Zero, 
-                TimeSpan.FromSeconds(30)
+                TimeSpan.Zero,
+                TimeSpan.FromSeconds(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity))
             );
             // TODO:  TimeSpan.FromDays(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity)));
 
@@ -69,12 +70,14 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
             Console.WriteLine($"Iniciando {timerParams.BackUpConfig.ConfigurationName} back up.");
             BackUpHistory bcRecord = await _backUpManager.DoBackUp(timerParams.BackUpConfig);
             
+            
             using (var scope = _serviceProvider.CreateScope())
             {
                 var backUpHistoryService = scope.ServiceProvider.GetRequiredService<IBackUpHistoryService>();
                 await backUpHistoryService.Add(bcRecord);
             }
-
+            
+          
             using (var scope = _serviceProvider.CreateScope())
             {
                 var backUpSystemApiRequestService = scope.ServiceProvider.GetRequiredService<IBackUpSystemApiRequestService>();

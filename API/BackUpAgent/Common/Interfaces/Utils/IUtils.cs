@@ -10,5 +10,7 @@ namespace BackUpAgent.Common.Interfaces.Utils
     public interface IUtils
     {
         int GetAmountOfDaysFromPeriodicity(Periodicity periodicity);
+        double CalculateFileSizeInMB(string backUpPath);
+        public void DeleteOldFilesKeepingN(string path, string fileName, string regexPattern, int filesToKeep);
     }
 }
