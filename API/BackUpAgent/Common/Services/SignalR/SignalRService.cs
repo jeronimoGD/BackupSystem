@@ -1,7 +1,9 @@
 ﻿using BackUpAgent.Common.Interfaces.ApiRequests;
+using BackUpAgent.Common.Interfaces.DbServices;
 using BackUpAgent.Common.Interfaces.Repository;
 using BackUpAgent.Common.Interfaces.ScheduledTasks;
 using BackUpAgent.Common.Interfaces.SignalR;
+using BackUpAgent.Common.Services.ScheduledTasks;
 using BackUpAgent.Data.Entities;
 using BackUpAgent.Models.ApiInteractions;
 using BackUpAgent.Models.ApplicationSettings;
@@ -23,17 +25,19 @@ namespace BackUpAgent.Common.Services
     {
         private readonly IBackUpSystemApiRequestService _agentConnectionReqService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IBackUpConfigurationService _backUpConfigurationService;
         private HubConnection _hubConnection;
         private readonly IBackUpScheduler _backUpScheduler;
         private readonly AppSettings _appSettings;
         private Timer _keepAliveTimer;
 
-        public SignalRService(IOptions<AppSettings> appSettings, IUnitOfWork unitOfWork, IBackUpScheduler backUpScheduler, IBackUpSystemApiRequestService agentConnectionReqService)
+        public SignalRService(IOptions<AppSettings> appSettings, IUnitOfWork unitOfWork, IBackUpScheduler backUpScheduler, IBackUpSystemApiRequestService agentConnectionReqService, IBackUpConfigurationService backUpConfigurationService)
         {
             _appSettings = appSettings.Value;
             _unitOfWork = unitOfWork;
             _backUpScheduler = backUpScheduler;
             _agentConnectionReqService = agentConnectionReqService;
+            _backUpConfigurationService = backUpConfigurationService;
         }
 
         public void ConfigureHubConnection()
@@ -43,6 +47,10 @@ namespace BackUpAgent.Common.Services
             _hubConnection = new HubConnectionBuilder()
                              .WithUrl(_appSettings.AgentManagerApiUrl+"/agentConfigurationHub?connectionKey=" + Guid.Parse(_appSettings.AgentConnectionKey))
                              .Build();
+
+            SetNewConfigurationAvailableAction();
+            SetConfigurationDeletedAction();
+            SetPeriodicKeppALive();
         }
 
         public async Task StartAsync()
@@ -67,7 +75,7 @@ namespace BackUpAgent.Common.Services
             await _hubConnection.StopAsync();
         }
 
-        public void SetNewConfigurationAvailableAction()
+        private void SetNewConfigurationAvailableAction()
         {
 
             _hubConnection.On<string>("NewBackUpConfigurationAvaialable", async (confName) =>
@@ -100,7 +108,18 @@ namespace BackUpAgent.Common.Services
             });
         }
 
-        public void SetPeriodicKeppALive()
+        private void SetConfigurationDeletedAction()
+        {
+
+            _hubConnection.On<string>("BackUpConfigurationDeleted", async (confName) =>
+            {
+                Console.WriteLine($"Deleting {confName} back up configuration!");
+                _backUpScheduler.CancelTask(confName);
+                var deletedBc = await _backUpConfigurationService.Delete(bc => bc.ConfigurationName == confName);
+            });
+        }
+
+        private void SetPeriodicKeppALive()
         {
             _keepAliveTimer = new Timer(async state =>
             {

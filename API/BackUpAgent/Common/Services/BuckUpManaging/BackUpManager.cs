@@ -49,6 +49,7 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
             {
                 if (conf.ExcludedTablesJsonList != string.Empty && conf.ExcludedTablesJsonList != null)
                 {
+                    // TODO: Implement partial backups
                     // excludedTablesSqlFormat = string.Join(",", JsonConvert.DeserializeObject<List<string>>(conf.ExcludedTablesJsonList));
                 }
 
@@ -96,7 +97,6 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
                 backUpRecord.BackUpSizeInMB = _utils.CalculateFileSizeInMB(backupPath);
                 backUpRecord.Description = "Back up finished succesfully!";
 
-                // string regexPattern = $"{Regex.Escape(conf.TarjetDbName)}_{Regex.Escape(dateFormat)}.{Regex.Escape("bak")}";
                 string regexPattern = $"{Regex.Escape(conf.TarjetDbName)}_\\.?";
                 _utils.DeleteOldFilesKeepingN(targetDirectoryPath, backUpName, regexPattern, conf.LastNBackUpsToStore);
                 // TODO: set if avaibale to download when online back ups are developed

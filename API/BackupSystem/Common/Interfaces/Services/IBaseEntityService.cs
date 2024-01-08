@@ -2,6 +2,7 @@
 using BackupSystem.DTO.GenericDTOs;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 
 namespace BackupSystem.Common.Interfaces.Services
 {
@@ -11,6 +12,7 @@ namespace BackupSystem.Common.Interfaces.Services
         Task<APIResponse> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0, params Expression<Func<TEntity, object>>[] includes);
         Task<APIResponse> Add(TEntity entity);
         Task<APIResponse> Add(GenericCreateDTO createDTO, Expression<Func<TEntity, bool>> filtro);
+        Task<APIResponse> Delete(TEntity entity);
         Task<APIResponse> Delete(Expression<Func<TEntity, bool>> filtro);
         Task<APIResponse> Update(TEntity entity);
         Task<APIResponse> Update(GenericUpdateDTO updateDTO, Expression<Func<TEntity, bool>> filtro);

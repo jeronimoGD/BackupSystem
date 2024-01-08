@@ -57,15 +57,16 @@ namespace BackUpAgent.Common.Services.DbServices
             return entities.FirstOrDefault();
         }
 
-        public async Task Delete(Expression<Func<TEntity, bool>> filtro)
+        public async Task<TEntity> Delete(Expression<Func<TEntity, bool>> filtro)
         {
-
+            TEntity entity = null;
             try
             {
                 var entityToDelete = await GetSingle(filtro);
                 if (entityToDelete != null)
                 {
                     await _repository.Delete(entityToDelete);
+                    entity = entityToDelete;
                 }
                 else
                 {
@@ -76,6 +77,8 @@ namespace BackUpAgent.Common.Services.DbServices
             {
                 Console.WriteLine(e.ToString());
             }
+
+            return entity;
         }
 
         public async Task Update(TEntity entity)

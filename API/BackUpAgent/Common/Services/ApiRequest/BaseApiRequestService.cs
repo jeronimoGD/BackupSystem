@@ -23,7 +23,6 @@ namespace BackUpAgent.Common.Services
 
         public async Task<T> SendRequestAsync<T>(APIRequest apiRequest)
         {
-
             APIResponse response = new APIResponse();
 
             try
@@ -70,7 +69,6 @@ namespace BackUpAgent.Common.Services
                     response = JsonConvert.DeserializeObject<APIResponse>(apiContent);
                     response.StatusCode = apiResponse.StatusCode;
                     response.IsSuccesful = apiResponse.IsSuccessStatusCode;
-                    response.ErrorMessages= apiResponse.Headers.ToString();
 
                 }
             }

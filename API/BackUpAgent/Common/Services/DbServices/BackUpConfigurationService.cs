@@ -23,8 +23,7 @@ namespace BackUpAgent.Common.Services.DbServices
                 {
                     bc.Id = 0;
                     await _unitOfWork.BackUpConfigurations.Create(bc);
-                }
-                //await _unitOfWork.BackUpConfigurations.CreateN(backUpConfigurations);
+                } 
             }
             catch (Exception ex)
             {

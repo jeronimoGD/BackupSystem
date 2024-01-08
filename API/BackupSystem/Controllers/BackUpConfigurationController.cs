@@ -84,7 +84,13 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteBackUpConfigurationByName(string name)
         {
-            _response = await _backUpConfigurationService.Delete(a => a.ConfigurationName == name);
+            BackUpConfiguration conf = await _backUpConfigurationService.GetSingle(a => a.ConfigurationName == name);
+            _response = await _backUpConfigurationService.Delete(conf);
+
+            if (_response.IsSuccesful)
+            {
+                _agentConfigurationHubService.NotifyConfigurationDeleted(conf.AgentId, conf.ConfigurationName);
+            }
             return MapToActionResult(this, _response);
         }
 

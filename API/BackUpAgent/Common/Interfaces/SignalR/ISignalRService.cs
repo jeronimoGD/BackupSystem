@@ -10,8 +10,6 @@ namespace BackUpAgent.Common.Interfaces.SignalR
     public interface ISignalRService
     {
         void ConfigureHubConnection();
-        void SetNewConfigurationAvailableAction();
-        void SetPeriodicKeppALive();
         Task StartAsync();
         Task StopAsync();
     }

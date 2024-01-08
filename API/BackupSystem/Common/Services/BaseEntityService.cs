@@ -77,6 +77,23 @@ namespace BackupSystem.Common.Services
             return entities.FirstOrDefault();
         }
 
+        public async Task<APIResponse> Delete(TEntity entity)
+        {
+            APIResponse response = new APIResponse();
+
+            try
+            {
+                await _repository.Delete(entity);
+                response = APIResponse.Ok(entity);
+            }
+            catch (Exception e)
+            {
+                response = APIResponse.InternalServerError(e.ToString());
+            }
+
+            return response;
+        }
+
         public async Task<APIResponse> Delete(Expression<Func<TEntity, bool>> filtro)
         {
             APIResponse response = new APIResponse();
@@ -87,7 +104,7 @@ namespace BackupSystem.Common.Services
                 if (entityToDelete != null)
                 {
                     await _repository.Delete(entityToDelete);
-                    response = APIResponse.NoContent();
+                    response = APIResponse.Ok(entityToDelete);
                 }
                 else
                 {

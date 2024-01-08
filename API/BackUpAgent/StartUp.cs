@@ -30,7 +30,7 @@ namespace BackUpAgent
 
         public async Task StartAgentAsync()
         {
-            Console.WriteLine($"Starting Agent {_appSettings.AgentConnectionKey}");
+            Console.WriteLine($"Starting Agent with ID: {_appSettings.AgentConnectionKey}");
             Console.WriteLine($"Asking for authtorization!");
 
             APIResponse authorizationResponse = await _agentConnectionReqService.GetAuthorizationToConnect<APIResponse>(Guid.Parse(_appSettings.AgentConnectionKey));
@@ -53,9 +53,7 @@ namespace BackUpAgent
 
                         // Signal R
                         _signalRService.ConfigureHubConnection();
-                        _signalRService.SetNewConfigurationAvailableAction();
                         _signalRService.StartAsync();
-                        _signalRService.SetPeriodicKeppALive();
 
                         Console.WriteLine($"Press any key to stop agent!");
                         do

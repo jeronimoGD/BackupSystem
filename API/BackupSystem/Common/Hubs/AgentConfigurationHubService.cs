@@ -19,6 +19,14 @@ namespace BackupSystem.Common.Hubs
            
         }
 
+        public async Task NotifyConfigurationDeleted(Guid connectionKey, string confName)
+        {
+            foreach (var connectionId in _signalRConnectionsManager.GetConnections(connectionKey))
+            {
+                _hubContext.Clients.Client(connectionId).SendAsync("BackUpConfigurationDeleted", confName);
+            }
+        }
+
         public async Task NotifyNewConfiguration(Guid connectionKey, string confName)
         {
             foreach (var connectionId in _signalRConnectionsManager.GetConnections(connectionKey))
