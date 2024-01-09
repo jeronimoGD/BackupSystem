@@ -5,6 +5,7 @@ using BackUpAgent.Data.Entities;
 using BackUpAgent.Models.ApiInteractions;
 using BackUpAgent.Models.ApplicationSettings;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using static BackUpAgent.Models.ApiInteractions.APIHttpActions;
@@ -16,11 +17,14 @@ namespace BackUpAgent.Common.Services
         private readonly AppSettings _appSettings;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IMapper _mapper;
-        public BackUpSystemApiRequestService(IHttpClientFactory httpClientFactory, IOptions<AppSettings> apiSettings, IMapper mapper) : base(httpClientFactory)
+        private readonly ILogger<StartUp> _logger;
+
+        public BackUpSystemApiRequestService(IHttpClientFactory httpClientFactory, IOptions<AppSettings> apiSettings, IMapper mapper, ILogger<StartUp> logger) : base(httpClientFactory, logger)
         {
             _appSettings = apiSettings.Value;
             _httpClientFactory = httpClientFactory;
             _mapper = mapper;
+            _logger = logger;
         }
 
         public async Task<T> GetAuthorizationToConnect<T>(Guid connectionKey, string token = null)
@@ -50,7 +54,7 @@ namespace BackUpAgent.Common.Services
                 APITipo = APITipo.GET,
                 Url = _appSettings.AgentManagerApiUrl + "/api/Agents/GetBackUpConfigurationByAgent?connectionKey=" + connectionKey.ToString(),
                 Token = token
-            });
+            });   
         }
 
         public async Task<T> RegisterBackUpHistoryRecord<T>(BackUpHistory backUpHistory, string token = null)

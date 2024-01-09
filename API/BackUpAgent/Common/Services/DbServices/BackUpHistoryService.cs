@@ -4,13 +4,15 @@ using BackUpAgent.Common.Interfaces.Repository;
 using BackUpAgent.Data.Entities;
 using BackUpAgent.Models.ApiInteractions;
 using BackUpAgent.Models.ApplicationSettings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace BackUpAgent.Common.Services.DbServices
 {
     public class BackUpHistoryService : BaseEntityService<BackUpHistory>, IBackUpHistoryService
     {
-        public BackUpHistoryService(IUnitOfWork unitOfWork) : base(unitOfWork)
+        
+        public BackUpHistoryService(IUnitOfWork unitOfWork, ILogger<BackUpHistoryService> logger) : base(unitOfWork, logger)
         {
         }
     }

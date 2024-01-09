@@ -8,21 +8,26 @@ using Azure;
 using System;
 using BackUpAgent.Common.Interfaces.ApiRequests;
 using BackUpAgent.Data.Entities;
+using Microsoft.Extensions.Logging;
 namespace BackUpAgent.Common.Services
 {
     public class BaseApiRequestService : IBaseApiRequestService
     {
         public APIResponse responseModel { get; set; }
         public IHttpClientFactory _httpClientFactory { get; set; }
+        private readonly ILogger<StartUp> _logger;
 
-        public BaseApiRequestService(IHttpClientFactory httpClientFactory)
+        public BaseApiRequestService(IHttpClientFactory httpClientFactory, ILogger<StartUp> logger)
         {
             this.responseModel = new();
             _httpClientFactory = httpClientFactory;
+            _logger = logger;
         }
 
         public async Task<T> SendRequestAsync<T>(APIRequest apiRequest)
         {
+            _logger.LogInformation("\n");
+
             APIResponse response = new APIResponse();
 
             try
@@ -81,6 +86,8 @@ namespace BackUpAgent.Common.Services
                     IsSuccesful = false
                 };
             }
+
+            _logger.LogInformation("\n");
 
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(response)); ;
         }

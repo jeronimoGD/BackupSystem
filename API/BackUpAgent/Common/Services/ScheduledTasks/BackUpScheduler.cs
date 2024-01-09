@@ -9,6 +9,7 @@ using BackUpAgent.Models.ApiInteractions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,12 +27,14 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
         private readonly IBackUpManager _backUpManager;
         private readonly IServiceProvider _serviceProvider;
         private readonly IUtils _utils;
+        private readonly ILogger<BackUpScheduler> _logger;
 
-        public BackUpScheduler(IBackUpManager backUpManager, IUtils utils, IServiceProvider serviceProvider)
+        public BackUpScheduler(IBackUpManager backUpManager, IUtils utils, IServiceProvider serviceProvider, ILogger<BackUpScheduler> logger)
         {
             _backUpManager = backUpManager;
             _utils = utils;
             _serviceProvider = serviceProvider;
+            _logger = logger;
         }
 
         public Task StartAsync(CancellationToken cancellationToken)
@@ -67,7 +70,7 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
 
         private async Task BackUpTimersCallbackAsync(BackUpTimerCallbackParams timerParams)
         {
-            Console.WriteLine($"Iniciando {timerParams.BackUpConfig.ConfigurationName} back up.");
+            _logger.LogInformation($"Iniciando {timerParams.BackUpConfig.ConfigurationName} back up.");
             BackUpHistory bcRecord = await _backUpManager.DoBackUp(timerParams.BackUpConfig);
             
             
@@ -84,7 +87,7 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
                 APIResponse res = await backUpSystemApiRequestService.RegisterBackUpHistoryRecord<APIResponse>(bcRecord);
                 if (!res.IsSuccesful)
                 {
-                    Console.WriteLine($"Error al registrar el back up en el historial general {res.ErrorMessages}");
+                    _logger.LogError($"Error al registrar el back up en el historial general {res.ErrorMessages}");
                 }
             }
         }

@@ -1,16 +1,18 @@
 ﻿using BackUpAgent.Common.Interfaces.DbServices;
 using BackUpAgent.Common.Interfaces.Repository;
 using BackUpAgent.Data.Entities;
+using Microsoft.Extensions.Logging;
 
 namespace BackUpAgent.Common.Services.DbServices
 {
     public class BackUpConfigurationService : BaseEntityService<BackUpConfiguration>, IBackUpConfigurationService
     {
         private readonly IUnitOfWork _unitOfWork;
-
-        public BackUpConfigurationService(IUnitOfWork unitOfWork) : base(unitOfWork)
+        private readonly ILogger<BackUpConfigurationService> _logger;
+        public BackUpConfigurationService(IUnitOfWork unitOfWork, ILogger<BackUpConfigurationService> logger) : base(unitOfWork, logger)
         {
             _unitOfWork = unitOfWork;
+            _logger = logger;
         }
 
         public async Task UpdateConfigurations(List<BackUpConfiguration> backUpConfigurations)
@@ -27,7 +29,7 @@ namespace BackUpAgent.Common.Services.DbServices
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.ToString());
+                _logger.LogError(ex.ToString());
             }
         }
     }

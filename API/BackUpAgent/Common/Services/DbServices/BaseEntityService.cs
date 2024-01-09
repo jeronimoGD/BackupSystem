@@ -2,6 +2,7 @@
 using BackUpAgent.Common.Interfaces.DbServices;
 using BackUpAgent.Common.Interfaces.Repository;
 using BackupSystem.Common.Repository;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -11,8 +12,9 @@ namespace BackUpAgent.Common.Services.DbServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<TEntity> _repository;
+        private readonly ILogger<BaseEntityService<TEntity>> _logger;
 
-        public BaseEntityService(IUnitOfWork unitOfWork)
+        public BaseEntityService(IUnitOfWork unitOfWork, ILogger<BaseEntityService<TEntity>> logger)
         {
             _unitOfWork = unitOfWork;
 
@@ -28,6 +30,7 @@ namespace BackUpAgent.Common.Services.DbServices
                     _repository = (IRepository<TEntity>?)LasPropiedades[i].GetValue(_unitOfWork);
                 }
             }
+            _logger = logger;
         }
 
         public async Task<IEnumerable<TEntity>> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0,  params Expression<Func<TEntity, object>>[] includes)
@@ -40,12 +43,12 @@ namespace BackUpAgent.Common.Services.DbServices
 
                 if (entities == null)
                 {
-                    Console.WriteLine("Not found.");
+                    _logger.LogInformation("Not found.");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger.LogError(e.ToString());
             }
 
             return entities;
@@ -70,12 +73,12 @@ namespace BackUpAgent.Common.Services.DbServices
                 }
                 else
                 {
-                    Console.WriteLine("Not found.");
+                    _logger.LogWarning("Not found.");
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger.LogError(e.ToString());
             }
 
             return entity;
@@ -89,7 +92,7 @@ namespace BackUpAgent.Common.Services.DbServices
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger.LogError(e.ToString());
             }
         }
 
@@ -101,7 +104,7 @@ namespace BackUpAgent.Common.Services.DbServices
             }
             catch (Exception e)
             {
-                Console.WriteLine(e.ToString());
+                _logger.LogError(e.ToString());
             }
         }
 

@@ -20,15 +20,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 internal class Program
 {
     private static async Task Main(string[] args)
     {
-
-        var configurationBuilder = new ConfigurationBuilder();
-        BuildConfig(configurationBuilder);
-
         var host = Host.CreateDefaultBuilder()
                     .ConfigureServices((context, services)=>
                     {
@@ -70,6 +67,30 @@ internal class Program
                         // Auto Mapper
                         services.AddAutoMapper(typeof(MappingProfile));
 
+
+                    })
+                    .ConfigureAppConfiguration((hostingContext, config) =>
+                    {
+                        var configPath = args.FirstOrDefault(arg => arg.StartsWith("--configFilePath="));
+                        string test = hostingContext.Configuration["configFilePath"];
+                        
+                        if (!string.IsNullOrEmpty(configPath))
+                        {
+                            var path = configPath.Substring("--configFilePath=".Length);
+                            config.AddJsonFile(path, optional: false, reloadOnChange: true);
+                            config.AddEnvironmentVariables();
+                        }
+                        else
+                        {
+                            config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                            config.AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}. json", optional: true);
+                            config.AddEnvironmentVariables();
+                        }
+                    })
+                    .ConfigureLogging((hostingContext, logging) =>
+                    {
+                        logging.AddConsole().
+                                AddConfiguration(hostingContext.Configuration.GetSection("Logging"));
                     })
                     .Build();
 
@@ -85,15 +106,9 @@ internal class Program
                 Console.WriteLine(ex.Message);
             }
         }
+
         var service = ActivatorUtilities.CreateInstance<StartUp>(host.Services);
         host.RunAsync();
         await service.StartAgentAsync();
-    }
-    static void BuildConfig(IConfigurationBuilder configBuilder)
-    {
-        configBuilder.SetBasePath(Directory.GetCurrentDirectory())
-               .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-               .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production"}. json", optional: true)
-               .AddEnvironmentVariables();
-    }
+    }    
 }

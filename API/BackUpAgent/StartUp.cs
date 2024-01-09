@@ -6,6 +6,7 @@ using BackUpAgent.Common.Interfaces.SignalR;
 using BackUpAgent.Data.Entities;
 using BackUpAgent.Models.ApiInteractions;
 using BackUpAgent.Models.ApplicationSettings;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -18,44 +19,47 @@ namespace BackUpAgent
         private readonly ISignalRService _signalRService;
         private readonly IBackUpScheduler _backUpScheduler;
         private readonly IBackUpConfigurationService _backUpConfigurationService;
+        private readonly ILogger<StartUp> _logger;
 
-        public StartUp(IOptions<AppSettings> appSettings, IBackUpSystemApiRequestService agentConnectionReqService, ISignalRService signalRService, IBackUpScheduler backUpScheduler, IBackUpConfigurationService backUpConfigurationService)
+        public StartUp(IOptions<AppSettings> appSettings, IBackUpSystemApiRequestService agentConnectionReqService, ISignalRService signalRService, IBackUpScheduler backUpScheduler, IBackUpConfigurationService backUpConfigurationService, ILogger<StartUp> logger)
         {
             _appSettings = appSettings.Value;
             _agentConnectionReqService = agentConnectionReqService;
             _signalRService = signalRService;
             _backUpScheduler = backUpScheduler;
             _backUpConfigurationService = backUpConfigurationService;
+            _logger = logger;
         }
 
         public async Task StartAgentAsync()
         {
-            Console.WriteLine($"Starting Agent with ID: {_appSettings.AgentConnectionKey}");
-            Console.WriteLine($"Asking for authtorization!");
+            _logger.LogInformation($"Starting Agent with ID: {_appSettings.AgentConnectionKey}");
+            _logger.LogInformation($"Asking for authtorization!");
 
             APIResponse authorizationResponse = await _agentConnectionReqService.GetAuthorizationToConnect<APIResponse>(Guid.Parse(_appSettings.AgentConnectionKey));
 
             if (authorizationResponse.IsSuccesful)
             {
-                Console.WriteLine($"Authorized to start agent!");
-                Console.WriteLine($"Asking for configuration!");
+                _logger.LogInformation($"Authorized to start agent!");
+                _logger.LogInformation($"Asking for configuration!");
                 APIResponse configurationResponse = await _agentConnectionReqService.GetBackUpConfigurations<APIResponse>(Guid.Parse(_appSettings.AgentConnectionKey));
 
                 if (configurationResponse.IsSuccesful)
                 {
-                    Console.WriteLine($"Configuration received");
+                    _logger.LogInformation($"Configuration received");
                     try
                     {
                         configurationResponse.Result = JsonConvert.DeserializeObject<List<BackUpConfiguration>>(configurationResponse.Result.ToString());
                         List<BackUpConfiguration> backUpConfigurations = (List<BackUpConfiguration>)configurationResponse.Result;
                         await _backUpConfigurationService.UpdateConfigurations(backUpConfigurations);
-                        _backUpScheduler.StartAllConfiguredBackUpsAsync(backUpConfigurations);
-
+                        
                         // Signal R
                         _signalRService.ConfigureHubConnection();
                         _signalRService.StartAsync();
 
-                        Console.WriteLine($"Press any key to stop agent!");
+                        _backUpScheduler.StartAllConfiguredBackUpsAsync(backUpConfigurations);
+
+                        
                         do
                         {
 
@@ -65,7 +69,7 @@ namespace BackUpAgent
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(ex.Message);
+                        _logger.LogError(ex.Message);
                     }
                 }
                 else
@@ -75,7 +79,7 @@ namespace BackUpAgent
             }
             else
             {
-                Console.WriteLine(authorizationResponse.ErrorMessages);
+                _logger.LogError(authorizationResponse.ErrorMessages);
             }
         }
     }

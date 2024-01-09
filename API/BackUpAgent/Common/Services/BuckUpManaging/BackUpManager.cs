@@ -3,6 +3,7 @@ using BackUpAgent.Common.Interfaces.NewFolder;
 using BackUpAgent.Common.Interfaces.Utils;
 using BackUpAgent.Data.Entities;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic;
 using Newtonsoft.Json;
@@ -21,10 +22,11 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
     public class BackUpManager : IBackUpManager
     {
         private readonly IUtils _utils;
-
-        public BackUpManager(IUtils utils)
+        private readonly ILogger<BackUpManager> _logger;
+        public BackUpManager(IUtils utils, ILogger<BackUpManager> logger)
         {
             _utils = utils;
+            _logger = logger;
         }
 
         public async Task<BackUpHistory> DoBackUp(BackUpConfiguration conf)
@@ -64,7 +66,7 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"Error al crear la carpeta '{backUpsFolder}': {ex.Message}");
+                        _logger.LogError($"Error al crear la carpeta '{backUpsFolder}': {ex.Message}");
                         return backUpRecord;
                     }
                 }
@@ -91,7 +93,7 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
                     }
                 }
 
-                Console.WriteLine($"Back up finished succesfully at: {backupPath}");
+                _logger.LogInformation($"Back up finished succesfully at: {backupPath}");
                 backUpRecord.IsSuccessfull = true;
                 backUpRecord.BackUpPath = backupPath;
                 backUpRecord.BackUpSizeInMB = _utils.CalculateFileSizeInMB(backupPath);
@@ -103,7 +105,7 @@ namespace BackUpAgent.Common.Services.BuckUpManaging
             }
             catch (Exception e)
             {
-                Console.WriteLine($"{e.Message}");
+                _logger.LogError($"{e.Message}");
                 backUpRecord.Description = e.Message;
             }
 

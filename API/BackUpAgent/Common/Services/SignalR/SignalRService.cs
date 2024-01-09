@@ -8,6 +8,7 @@ using BackUpAgent.Data.Entities;
 using BackUpAgent.Models.ApiInteractions;
 using BackUpAgent.Models.ApplicationSettings;
 using Microsoft.AspNetCore.SignalR.Client;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using System;
@@ -30,20 +31,22 @@ namespace BackUpAgent.Common.Services
         private readonly IBackUpScheduler _backUpScheduler;
         private readonly AppSettings _appSettings;
         private Timer _keepAliveTimer;
+        private readonly ILogger<SignalRService> _logger;
 
-        public SignalRService(IOptions<AppSettings> appSettings, IUnitOfWork unitOfWork, IBackUpScheduler backUpScheduler, IBackUpSystemApiRequestService agentConnectionReqService, IBackUpConfigurationService backUpConfigurationService)
+        public SignalRService(IOptions<AppSettings> appSettings, IUnitOfWork unitOfWork, IBackUpScheduler backUpScheduler, IBackUpSystemApiRequestService agentConnectionReqService, IBackUpConfigurationService backUpConfigurationService, ILogger<SignalRService> logger)
         {
             _appSettings = appSettings.Value;
             _unitOfWork = unitOfWork;
             _backUpScheduler = backUpScheduler;
             _agentConnectionReqService = agentConnectionReqService;
             _backUpConfigurationService = backUpConfigurationService;
+            _logger = logger;
         }
 
         public void ConfigureHubConnection()
         {
 
-            Console.WriteLine($"Configuring Signal R Hub");
+            _logger.LogInformation($"Configuring Signal R Hub");
             _hubConnection = new HubConnectionBuilder()
                              .WithUrl(_appSettings.AgentManagerApiUrl+"/agentConfigurationHub?connectionKey=" + Guid.Parse(_appSettings.AgentConnectionKey))
                              .Build();
@@ -55,23 +58,23 @@ namespace BackUpAgent.Common.Services
 
         public async Task StartAsync()
         {
-            Console.WriteLine($"Trying to Start hub connection!");
+            _logger.LogInformation($"Trying to Start hub connection!");
 
             try
             {
                 await _hubConnection.StartAsync();
-                Console.WriteLine($"Hub connection Started!");
+                _logger.LogInformation($"Hub connection Started!");
             }
             catch( Exception ex ) 
             {
-                Console.WriteLine("Error starting hub connection:", ex.ToString());            
+                _logger.LogError("Error starting hub connection:", ex.ToString());            
             }
         }
 
         public async Task StopAsync()
         {
 
-            Console.WriteLine($"Stoping hub connection!");
+            _logger.LogInformation($"Stoping hub connection!");
             await _hubConnection.StopAsync();
         }
 
@@ -80,13 +83,13 @@ namespace BackUpAgent.Common.Services
 
             _hubConnection.On<string>("NewBackUpConfigurationAvaialable", async (confName) =>
             {
-                Console.WriteLine($"Asking for new configuration");
+                _logger.LogInformation($"Asking for new configuration");
 
                 APIResponse res = await _agentConnectionReqService.GetBackUpConfigurationByName<APIResponse>(confName);
 
                 if (res.IsSuccesful)
                 {
-                    Console.WriteLine($"New configuration received {res.Result}");
+                    _logger.LogInformation($"New configuration received {res.Result}");
                     BackUpConfiguration newBackUpConfiguration = JsonConvert.DeserializeObject<BackUpConfiguration>(res.Result.ToString());
                     var doesBcConfigExist = (await _unitOfWork.BackUpConfigurations.Get(bc => bc.ConfigurationName == newBackUpConfiguration.ConfigurationName)).FirstOrDefault() != null;
 
@@ -98,12 +101,12 @@ namespace BackUpAgent.Common.Services
                     }
                     else
                     {
-                        Console.WriteLine($"Configuration with name {newBackUpConfiguration.ConfigurationName} already exist.");
+                        _logger.LogWarning($"Configuration with name {newBackUpConfiguration.ConfigurationName} already exist.");
                     }
                 }
                 else
                 {
-                    Console.WriteLine(res.ErrorMessages);
+                    _logger.LogError(res.ErrorMessages);
                 }
             });
         }
@@ -113,7 +116,7 @@ namespace BackUpAgent.Common.Services
 
             _hubConnection.On<string>("BackUpConfigurationDeleted", async (confName) =>
             {
-                Console.WriteLine($"Deleting {confName} back up configuration!");
+                _logger.LogInformation($"Deleting {confName} back up configuration!");
                 _backUpScheduler.CancelTask(confName);
                 var deletedBc = await _backUpConfigurationService.Delete(bc => bc.ConfigurationName == confName);
             });
@@ -129,7 +132,7 @@ namespace BackUpAgent.Common.Services
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error al hacer ping al servidor: {ex.Message}");
+                    _logger.LogInformation($"Error al hacer ping al servidor: {ex.Message}");
                     StartAsync();
                 }
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));
