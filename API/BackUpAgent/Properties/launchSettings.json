@@ -6,6 +6,10 @@
     },
     "Perfil 1": {
       "commandName": "Project"
+    },
+    "Perfil 2": {
+      "commandName": "Project",
+      "commandLineArgs": "--configFilePath=appsettings2.json"
     }
   }
 }
