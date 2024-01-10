@@ -31,7 +31,7 @@ namespace BackupSystem.Common.Services
                 if (!await DoesEntityExists(a => a.ConfigurationName == createDto.ConfigurationName))
                 {
                     BackUpConfiguration newBackUpConf = _mapper.Map<BackUpConfiguration>(createDto);
-                    newBackUpConf.ExcludedTablesJsonList = JsonConvert.SerializeObject(createDto.ExcludedTablesList);
+                    newBackUpConf.ExcludedTablesJsonList = createDto.ExcludedTablesList == null ? null : JsonConvert.SerializeObject(createDto.ExcludedTablesList);
                     await _unitOfWork.BackUpConfigurations.Create(newBackUpConf);
                     response = APIResponse.Ok(newBackUpConf);
                 }

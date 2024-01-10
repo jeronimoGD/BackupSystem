@@ -58,7 +58,7 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
                 state => BackUpTimersCallbackAsync((BackUpTimerCallbackParams)state), 
                 new BackUpTimerCallbackParams { BackUpConfig = configuration},
                 TimeSpan.Zero,
-                TimeSpan.FromSeconds(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity))
+                TimeSpan.FromMinutes(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity))
             );
             // TODO:  TimeSpan.FromDays(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity)));
 
@@ -94,7 +94,6 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
 
         public void CancelTask(string taskName)
         {
-            // Cancelar una tarea en segundo plano específica
             lock (_backUpTasksLock)
             {
                 if (_backUpTasksDictionary.TryGetValue(taskName, out var task))
@@ -109,7 +108,6 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            // Detener todas las tareas en segundo plano
             lock (_backUpTasksLock)
             {
                 foreach (var (timer, cancellationTokenSource) in _backUpTasksDictionary.Values)
@@ -128,7 +126,6 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
 
         public void Dispose()
         {
-            // Liberar recursos si es necesario
             lock (_backUpTasksLock)
             {
                 foreach (var (timer, cancellationTokenSource) in _backUpTasksDictionary.Values)

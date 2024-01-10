@@ -26,8 +26,6 @@ namespace BackUpAgent.Common.Services
 
         public async Task<T> SendRequestAsync<T>(APIRequest apiRequest)
         {
-            _logger.LogInformation("\n");
-
             APIResponse response = new APIResponse();
 
             try
@@ -71,10 +69,17 @@ namespace BackUpAgent.Common.Services
                 if (apiResponse.Content != null)
                 {
                     var apiContent = await apiResponse.Content.ReadAsStringAsync();
-                    response = JsonConvert.DeserializeObject<APIResponse>(apiContent);
+                    if(apiContent != string.Empty)
+                    {
+                        response = JsonConvert.DeserializeObject<APIResponse>(apiContent);
+                    }
+
                     response.StatusCode = apiResponse.StatusCode;
                     response.IsSuccesful = apiResponse.IsSuccessStatusCode;
-
+                    if (!response.IsSuccesful)
+                    {
+                        response.ErrorMessages = apiResponse.ReasonPhrase;
+                    }
                 }
             }
             catch (Exception ex)
@@ -86,8 +91,6 @@ namespace BackUpAgent.Common.Services
                     IsSuccesful = false
                 };
             }
-
-            _logger.LogInformation("\n");
 
             return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(response)); ;
         }

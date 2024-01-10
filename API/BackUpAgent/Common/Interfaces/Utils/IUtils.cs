@@ -11,6 +11,7 @@ namespace BackUpAgent.Common.Interfaces.Utils
     {
         int GetAmountOfDaysFromPeriodicity(Periodicity periodicity);
         double CalculateFileSizeInMB(string backUpPath);
-        public void DeleteOldFilesKeepingN(string path, string fileName, string regexPattern, int filesToKeep);
+        void DeleteOldFilesKeepingN(string path, string fileName, string regexPattern, int filesToKeep);
+        bool CreateDirectoryIfDoeNotExist(string targetDirectoryPath);
     }
 }

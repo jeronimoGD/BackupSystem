@@ -1,5 +1,6 @@
 ﻿using BackUpAgent.Common.Enums;
 using BackUpAgent.Common.Interfaces.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,6 +12,13 @@ namespace BackUpAgent.Common.Services.Utils
 {
     public class Utils : IUtils
     {
+        private readonly ILogger<SignalRService> _logger;
+
+        public Utils(ILogger<SignalRService> logger)
+        {
+            _logger = logger;
+        }
+
         public int GetAmountOfDaysFromPeriodicity(Periodicity periodicity)
         {
             int days;
@@ -44,10 +52,15 @@ namespace BackUpAgent.Common.Services.Utils
         public double CalculateFileSizeInMB(string backUpPath)
         {
             double size = 0;
+
             if (File.Exists(backUpPath))
             {
                 FileInfo fileInfo = new FileInfo(backUpPath);
                 size = (double)fileInfo.Length / (1024 * 1024);
+            }
+            else
+            {
+                _logger.LogError($"Error calculating the size of file {backUpPath}. File does not exists.");
             }
 
             return size;
@@ -68,6 +81,28 @@ namespace BackUpAgent.Common.Services.Utils
                     backupFiles[i].Delete();
                 }
             }
+        }
+
+
+        public bool CreateDirectoryIfDoeNotExist(string targetDirectoryPath)
+        {
+            bool created = true;
+
+            if (!Directory.Exists(targetDirectoryPath))
+            {
+                try
+                {
+                    Directory.CreateDirectory(targetDirectoryPath);
+                }
+                catch (Exception ex)
+                {
+                    created = false;
+                    _logger.LogError($"Error creating the directory {targetDirectoryPath}: {ex.Message}");
+                }
+            }
+
+            return created;
+
         }
     }
 }

@@ -76,7 +76,7 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"Agent with this key does not xist in the system.");
+                    response = APIResponse.NotFound($"Agent with this key does not exist in the system.");
                 }
             }
             catch (Exception e)
