@@ -9,9 +9,11 @@ namespace BackUpAgent.Common.Interfaces.ApiRequests
 {
     public interface IBackUpSystemApiRequestService
     {
-        Task<T> GetAuthorizationToConnect<T>(Guid connectionKey, string token = null);
-        Task<T> GetBackUpConfigurations<T>(Guid connectionKey, string token = null);
-        Task<T> GetBackUpConfigurationByName<T>(string configurationName, string token = null);
-        Task<T> RegisterBackUpHistoryRecord<T>(BackUpHistory backUpHistory, string token = null);
+        void SetSessionToken(string SetSessionToken);
+        Task<T> GetAuthorizationToConnect<T>(Guid connectionKey);
+        Task<T> GetBackUpConfigurations<T>(Guid connectionKey);
+        Task<T> GetBackUpConfigurationByName<T>(string configurationName);
+        Task<T> RegisterBackUpHistoryRecord<T>(BackUpHistory backUpHistory);
+        Task<T> APILoging<T>();
     }
 }

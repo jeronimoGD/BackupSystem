@@ -73,13 +73,13 @@ namespace BackUpAgent.Common.Services
                     {
                         response = JsonConvert.DeserializeObject<APIResponse>(apiContent);
                     }
-
-                    response.StatusCode = apiResponse.StatusCode;
-                    response.IsSuccesful = apiResponse.IsSuccessStatusCode;
-                    if (!response.IsSuccesful)
+                    else
                     {
                         response.ErrorMessages = apiResponse.ReasonPhrase;
                     }
+
+                    response.StatusCode = apiResponse.StatusCode;
+                    response.IsSuccesful = apiResponse.IsSuccessStatusCode;
                 }
             }
             catch (Exception ex)

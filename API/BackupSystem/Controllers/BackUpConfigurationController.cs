@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BackupSystem.Common.Constants;
 using BackupSystem.Common.Hubs;
 using BackupSystem.Common.Interfaces.Hubs;
 using BackupSystem.Common.Interfaces.Services;
@@ -6,6 +7,7 @@ using BackupSystem.Common.Services;
 using BackupSystem.Controllers.AplicationResponse;
 using BackupSystem.Data.Entities;
 using BackupSystem.DTO.BackUpConfigurationDTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
@@ -33,7 +35,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpGet("GetBackUpConfigurations", Name = "GetBackUpConfigurations")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -45,7 +47,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpGet("GetBackUpConfiguration", Name = "GetBackUpConfiguration")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -58,6 +60,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpPost("AddBackUpConfiguration", Name = "AddBackUpConfiguration")]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -76,7 +79,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpDelete("DeleteBackUpConfigurationByName", Name = "DeleteBackUpConfigurationByName")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -95,7 +98,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpPut("UpdateBackUpConfiguration", Name = "UpdateBackUpConfiguration")]
-        // [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]

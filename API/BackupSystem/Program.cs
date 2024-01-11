@@ -24,9 +24,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-
 
 // Añadir security definition and requirements para autentificacion desde Swager
 builder.Services.AddSwaggerGen(options => {
@@ -57,17 +54,15 @@ builder.Services.AddSwaggerGen(options => {
     });
 });
 
-// Set aplication settings from apsettings.json
-builder.Services.Configure<APISettings>(builder.Configuration.GetSection("AppSettings"));
 
 // Añadir configuration para la autentification usando JSON Web Tokens (JWT)
-var key = builder.Configuration.GetValue<string>("AppSettings:IssuerSigningKey");
+var key = builder.Configuration.GetValue<string>("APISettings:JwtAuthFields:SecretKey");
 
 builder.Services.AddAuthentication(x =>
 {
     x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
     x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-
+    x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(x => {
     x.RequireHttpsMetadata = false;
     x.SaveToken = true;
@@ -79,6 +74,9 @@ builder.Services.AddAuthentication(x =>
         ValidateAudience = false
     };
 });
+
+// Set aplication settings from apsettings.json
+builder.Services.Configure<APISettings>(builder.Configuration.GetSection("APISettings"));
 
 // Add data base conexion string for migrations
 builder.Services.AddDbContext<ApplicationDbContext>(option =>
@@ -135,12 +133,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
-
-app.MapHub<AgentConfigurationHub>("/agentConfigurationHub");
-
-
 app.MapControllers();
+app.MapHub<AgentConfigurationHub>("/agentConfigurationHub");
 
 InitialConfiguration(app, app.Environment);
 

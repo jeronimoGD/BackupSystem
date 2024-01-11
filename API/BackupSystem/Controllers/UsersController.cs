@@ -30,7 +30,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpGet("GetUsers", Name = "GetUsers")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -42,7 +42,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpGet("GetUserById/{id:guid}", Name = "GetUserById")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -55,7 +55,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpGet("GetUserByName", Name = "GetUserByName")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -84,15 +84,14 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> LoginUser([FromForm] LoginRequestDTO loginRequest)
+        public async Task<IActionResult> LoginUser([FromBody] LoginRequestDTO loginRequest)
         {
             _response = await _userService.LogIn(loginRequest);
             return MapToActionResult(this, _response);
         }
 
-
         [HttpDelete("DeleteUserById/{id:guid}", Name = "DeleteUserById")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -105,7 +104,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpDelete("DeleteUserByName", Name = "DeleteUserByName")]
-        // TODO [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -118,7 +117,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpDelete("DeleteLogedUser", Name = "DeleteLogedUser")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -134,7 +133,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpPut("UpdateUserById/{id:guid}", Name = "UpdateUserById")]
-        [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -149,7 +148,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpPut("UpdateUserByName", Name = "UpdateUserByName")]
-        // [Authorize(Roles = DefaultRoles.Admin)]
+        [Authorize(AuthenticationSchemes = "Bearer", Roles = DefaultRoles.Admin)]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
@@ -162,7 +161,7 @@ namespace BackupSystem.Controllers
         }
 
         [HttpPut("UpdateLoggedUser", Name = "UpdateLoggedUser")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]

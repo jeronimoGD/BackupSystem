@@ -188,11 +188,10 @@ namespace BackupSystem.Common.Services
                 var entityToUpdate = await GetSingle(filtro, false);
                 if (entityToUpdate != null)
                 {
-                    TEntity newEntityData = _mapper.Map<TEntity>(updateDTO);
-                    PropertyInfo idProperty = entityToUpdate.GetType().GetProperty("Id");
-                    newEntityData.GetType().GetProperty("Id")?.SetValue(newEntityData, idProperty.GetValue(entityToUpdate));
-                    await _repository.Update(newEntityData);
-                    response = APIResponse.Ok(newEntityData);
+
+                    _mapper.Map(updateDTO, entityToUpdate);
+                    await _repository.Update(entityToUpdate);
+                    response = APIResponse.Ok(entityToUpdate);
                 }
                 else
                 {

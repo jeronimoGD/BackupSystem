@@ -1,8 +1,9 @@
 ﻿namespace BackupSystem.Common.Constants
 {
-    public class DefaultRoles
+    public static class DefaultRoles
     {
         public const string Admin = "Admin";
-        public const string User = "User";
+        public const string Agent = "Agent";
+        public const string User= "User";
     }
 }

@@ -44,11 +44,11 @@ internal class Program
                         services.AddHostedService<BackUpScheduler>();
 
                         // Inject hosted service
-                        services.AddTransient<IBackUpScheduler, BackUpScheduler>();
+                        services.AddSingleton<IBackUpScheduler, BackUpScheduler>();
 
                         // Add Http services
                         services.AddHttpClient<IBackUpSystemApiRequestService, BackUpSystemApiRequestService>();
-                        services.AddTransient<IBackUpSystemApiRequestService, BackUpSystemApiRequestService>();
+                        services.AddSingleton<IBackUpSystemApiRequestService, BackUpSystemApiRequestService>();
 
                         // SignalRServce
                         services.AddTransient<ISignalRService, SignalRService>();
@@ -66,8 +66,6 @@ internal class Program
 
                         // Auto Mapper
                         services.AddAutoMapper(typeof(MappingProfile));
-
-
                     })
                     .ConfigureAppConfiguration((hostingContext, config) =>
                     {

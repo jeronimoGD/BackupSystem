@@ -39,7 +39,7 @@ namespace BackupSystem.Data.Migrations
                     b.HasIndex("AgentName")
                         .IsUnique();
 
-                    b.ToTable("Agents");
+                    b.ToTable("Agents", (string)null);
                 });
 
             modelBuilder.Entity("BackupSystem.Data.Entities.ApplicationUser", b =>
@@ -149,7 +149,7 @@ namespace BackupSystem.Data.Migrations
                     b.HasIndex("ConfigurationName")
                         .IsUnique();
 
-                    b.ToTable("BackUpConfigurations");
+                    b.ToTable("BackUpConfigurations", (string)null);
                 });
 
             modelBuilder.Entity("BackupSystem.Data.Entities.BackUpHistory", b =>
@@ -194,7 +194,7 @@ namespace BackupSystem.Data.Migrations
                     b.HasIndex("BackUpName")
                         .IsUnique();
 
-                    b.ToTable("BackUpHistory");
+                    b.ToTable("BackUpHistory", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

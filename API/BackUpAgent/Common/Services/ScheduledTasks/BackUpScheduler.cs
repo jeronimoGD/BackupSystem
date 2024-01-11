@@ -58,7 +58,7 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
                 state => BackUpTimersCallbackAsync((BackUpTimerCallbackParams)state), 
                 new BackUpTimerCallbackParams { BackUpConfig = configuration},
                 TimeSpan.Zero,
-                TimeSpan.FromMinutes(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity))
+                TimeSpan.FromSeconds(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity))
             );
             // TODO:  TimeSpan.FromDays(_utils.GetAmountOfDaysFromPeriodicity(configuration.Periodicity)));
 
@@ -77,7 +77,14 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
             using (var scope = _serviceProvider.CreateScope())
             {
                 var backUpHistoryService = scope.ServiceProvider.GetRequiredService<IBackUpHistoryService>();
-                await backUpHistoryService.Add(bcRecord);
+                try
+                {
+                    await backUpHistoryService.Add(bcRecord);
+                }
+                catch(Exception ex) 
+                {
+                    _logger.LogWarning(ex.Message);
+                }                
             }
             
           

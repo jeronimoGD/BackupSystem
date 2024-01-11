@@ -1,9 +1,8 @@
 ﻿using AutoMapper;
-using Azure;
 using BackupSystem.ApplicationSettings;
+using BackupSystem.Common.Constants;
 using BackupSystem.Common.Interfaces.Repository;
 using BackupSystem.Common.Interfaces.Services;
-using BackupSystem.Common.Repository;
 using BackupSystem.Controllers.AplicationResponse;
 using BackupSystem.Data.Entities;
 using BackupSystem.DTO.LoginDTO;
@@ -15,7 +14,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq.Expressions;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace BackupSystem.Common.Services
@@ -75,7 +73,7 @@ namespace BackupSystem.Common.Services
 
             try
             {
-                var userToUpdate = (await _unitOfWork.ApplicationUsers.Get(filtro)).FirstOrDefault();
+                var userToUpdate = (await _unitOfWork.ApplicationUsers.Get(filtro, false)).FirstOrDefault();
 
                 if (userToUpdate != null)
                 {
@@ -83,10 +81,9 @@ namespace BackupSystem.Common.Services
 
                     if (isPasswordOk)
                     {
-                        ApplicationUser newUserData = _mapper.Map<ApplicationUser>(updateDTO);
-                        userToUpdate.Id = userToUpdate.Id;
-                        await _unitOfWork.ApplicationUsers.Update(newUserData);
-                        response = APIResponse.Ok(newUserData);
+                        _mapper.Map(updateDTO, userToUpdate);
+                        await _unitOfWork.ApplicationUsers.Update(userToUpdate);
+                        response = APIResponse.Ok(userToUpdate);
                     }
                     else
                     {
@@ -115,7 +112,6 @@ namespace BackupSystem.Common.Services
             {
                 LoginResponseDTO loginResponse = new LoginResponseDTO();
 
-                // _signInManager.SignInAsync
                 var logedUser = await _userManager.FindByNameAsync(loginRequestDTO.UserName);
 
                 if (logedUser != null)
@@ -126,13 +122,14 @@ namespace BackupSystem.Common.Services
                     {
                         var roles = await _userManager.GetRolesAsync(logedUser);
                         var tokenHandler = new JwtSecurityTokenHandler();
-                        var key = Encoding.ASCII.GetBytes(_apiSettings.JwtAuthFields.Key);
+                        var key = Encoding.ASCII.GetBytes(_apiSettings.JwtAuthFields.SecretKey);
+                        string role = roles.FirstOrDefault();
                         var tokenDecsriptor = new SecurityTokenDescriptor
                         {
                             Subject = new ClaimsIdentity(new Claim[]
                             {
                                 new Claim(ClaimTypes.NameIdentifier, logedUser.Id.ToString()),
-                                new Claim(ClaimTypes.Role, roles.FirstOrDefault())
+                                new Claim(ClaimTypes.Role, role)
                             }),
                             Expires = DateTime.UtcNow.AddDays(1),
                             SigningCredentials = new(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -145,7 +142,7 @@ namespace BackupSystem.Common.Services
                         {
                             UserName = logedUser.UserName,
                             Token = tokenHandler.WriteToken(token),
-                            Role = roles.FirstOrDefault()
+                            Role = role
                         };
 
                         response = APIResponse.Ok(loginResponse);
@@ -168,6 +165,23 @@ namespace BackupSystem.Common.Services
             return response;
         }
 
+        private async Task CreateRolesIfNoExist()
+        {
+            var rolesConstantesType = typeof(DefaultRoles);
+            var defaultRoles = rolesConstantesType.GetFields()
+                .Where(f => f.IsLiteral && !f.IsInitOnly)
+                .Select(f => f.GetValue(null).ToString())
+                .ToArray();
+
+            foreach(string role in defaultRoles)
+            {
+                if (!_roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
+                {
+                    await _roleManager.CreateAsync(new IdentityRole(role));
+                }
+            }
+        }
+
         public async Task<APIResponse> Register(RegisterRequestDTO registerRequestDTO)
         {
             APIResponse response = new APIResponse();
@@ -176,27 +190,31 @@ namespace BackupSystem.Common.Services
             {
                 var queryResponse = new IdentityResult { };
 
-                if (!_roleManager.RoleExistsAsync("admin").GetAwaiter().GetResult())
-                {
-                    await _roleManager.CreateAsync(new IdentityRole("admin"));
-                }
+                await CreateRolesIfNoExist();
 
                 ApplicationUser newUser = new ApplicationUser
                 {
                     UserName = registerRequestDTO.UserName,
                     Email = registerRequestDTO.Email
                 };
-
-                queryResponse = await _userManager.CreateAsync(newUser, registerRequestDTO.Password);
-
-                if (queryResponse.Succeeded)
+                var user = await _userManager.FindByNameAsync(registerRequestDTO.UserName);
+                
+                if (user == null)
                 {
-                    queryResponse = await _userManager.AddToRoleAsync(newUser, "admin");
-
+                    queryResponse = await _userManager.CreateAsync(newUser, registerRequestDTO.Password);
                     if (queryResponse.Succeeded)
                     {
-                        var usuarioApp = await _userManager.FindByNameAsync(registerRequestDTO.UserName);
-                        response = APIResponse.Ok(usuarioApp);
+                        queryResponse = await _userManager.AddToRoleAsync(newUser, registerRequestDTO.Role);
+
+                        if (queryResponse.Succeeded)
+                        {
+                            var usuarioApp = await _userManager.FindByNameAsync(registerRequestDTO.UserName);
+                            response = APIResponse.Ok(usuarioApp);
+                        }
+                        else
+                        {
+                            response = APIResponse.BadRequest(registerRequestDTO, queryResponse.Errors.ToString());
+                        }
                     }
                     else
                     {
@@ -205,8 +223,9 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.BadRequest(registerRequestDTO, queryResponse.Errors.ToString());
+                    response = APIResponse.BadRequest(registerRequestDTO, $"User {registerRequestDTO.UserName} already exists");
                 }
+
             }
             catch (Exception e)
             {

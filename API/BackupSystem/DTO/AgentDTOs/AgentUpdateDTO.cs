@@ -14,7 +14,5 @@ namespace BackupSystem.DTO.AgentDTOs
     {
         [Required]
         public string AgentName { get; set; }
-        [Required]
-        public Guid AgentKey { get; set; }
     }
 }
