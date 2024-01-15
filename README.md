@@ -26,6 +26,7 @@ To configure the system you should follow the next steps:
     }
   }
 }
+```
 
 ### 2. Start API: 
 1. Register atleast one user as Admin and one ase Agent.
@@ -60,6 +61,7 @@ To configure the system you should follow the next steps:
     }
   }
 }
+```
 
 ### 4. Start Agent:
 1. Once the agent start (you can start as many as you want with differtent agentKeys if previouslly created in the API) it should log in the API using the UserName and Password, get authorization to start using the AgentKey and get the back up configuration (null at the moment).
@@ -80,7 +82,7 @@ Ex:
     "lastNBackUpsToStore": [Number of old back ups you want to keep],
     "excludedTablesJsonList": [null as default if no tables want to be escluded. String array with the names of the tables of the source DB you want to exclude],
     "agentId": "[Id of the agent that has to execute the back ups]" }
-    
+```
 3. If you delete the configuration the agent will be notified and will stop the periodic back ups.
 4. If you update the configuration the agent will be notified and will update the parameters.
 5. If you delete the agent, the agent wil stop itself and all the configurations related to it will be eliminated too.
