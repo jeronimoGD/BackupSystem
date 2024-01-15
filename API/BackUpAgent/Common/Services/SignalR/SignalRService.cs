@@ -1,4 +1,5 @@
-﻿using BackUpAgent.Common.Interfaces.ApiRequests;
+﻿using AutoMapper;
+using BackUpAgent.Common.Interfaces.ApiRequests;
 using BackUpAgent.Common.Interfaces.DbServices;
 using BackUpAgent.Common.Interfaces.Repository;
 using BackUpAgent.Common.Interfaces.ScheduledTasks;
@@ -26,12 +27,12 @@ namespace BackUpAgent.Common.Services
     {
         private readonly IBackUpSystemApiRequestService _agentConnectionReqService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<SignalRService> _logger;
         private readonly IBackUpConfigurationService _backUpConfigurationService;
-        private HubConnection _hubConnection;
         private readonly IBackUpScheduler _backUpScheduler;
         private readonly AppSettings _appSettings;
+        private HubConnection _hubConnection;
         private Timer _keepAliveTimer;
-        private readonly ILogger<SignalRService> _logger;
 
         public SignalRService(IOptions<AppSettings> appSettings, IUnitOfWork unitOfWork, IBackUpScheduler backUpScheduler, IBackUpSystemApiRequestService agentConnectionReqService, IBackUpConfigurationService backUpConfigurationService, ILogger<SignalRService> logger)
         {
@@ -46,24 +47,26 @@ namespace BackUpAgent.Common.Services
         public void ConfigureHubConnection()
         {
 
-            _logger.LogInformation($"Configuring Signal R Hub");
+            _logger.LogInformation($"Configuring Signal R Hub.");
             _hubConnection = new HubConnectionBuilder()
                              .WithUrl(_appSettings.AgentManagerApiUrl+"/agentConfigurationHub?connectionKey=" + Guid.Parse(_appSettings.AgentConnectionKey))
                              .Build();
 
             SetNewConfigurationAvailableAction();
             SetConfigurationDeletedAction();
-            SetPeriodicKeppALive();
+            SetConfigurationUpdateAction();
+            SetAgentDeletedAction();
         }
 
         public async Task StartAsync()
         {
-            _logger.LogInformation($"Trying to Start hub connection!");
+            _logger.LogInformation($"Trying to Start hub connection.");
 
             try
             {
                 await _hubConnection.StartAsync();
-                _logger.LogInformation($"Hub connection Started!");
+                SetPeriodicKeppALive();
+                _logger.LogInformation($"Hub connection Started.");
             }
             catch( Exception ex ) 
             {
@@ -74,7 +77,7 @@ namespace BackUpAgent.Common.Services
         public async Task StopAsync()
         {
 
-            _logger.LogInformation($"Stoping hub connection!");
+            _logger.LogInformation($"Stoping hub connection.");
             await _hubConnection.StopAsync();
         }
 
@@ -83,13 +86,13 @@ namespace BackUpAgent.Common.Services
 
             _hubConnection.On<string>("NewBackUpConfigurationAvaialable", async (confName) =>
             {
-                _logger.LogInformation($"Asking for new configuration");
+                _logger.LogInformation($"Asking for new {confName} configuration.");
 
                 APIResponse res = await _agentConnectionReqService.GetBackUpConfigurationByName<APIResponse>(confName);
 
                 if (res.IsSuccesful)
                 {
-                    _logger.LogInformation($"New configuration received {res.Result}");
+                    _logger.LogInformation($"New configuration received {res.Result}.");
                     BackUpConfiguration newBackUpConfiguration = JsonConvert.DeserializeObject<BackUpConfiguration>(res.Result.ToString());
                     var doesBcConfigExist = (await _unitOfWork.BackUpConfigurations.Get(bc => bc.ConfigurationName == newBackUpConfiguration.ConfigurationName)).FirstOrDefault() != null;
 
@@ -111,14 +114,61 @@ namespace BackUpAgent.Common.Services
             });
         }
 
+        private void SetConfigurationUpdateAction()
+        {
+
+            _hubConnection.On<string>("BackUpConfigurationUpdated", async (confName) =>
+            {
+                _logger.LogInformation($"Asking for {confName} back up configuration update.");
+
+
+                APIResponse res = await _agentConnectionReqService.GetBackUpConfigurationByName<APIResponse>(confName);
+
+                if (res.IsSuccesful)
+                {
+                    _logger.LogInformation($"New configuration update received {res.Result}.");
+                    BackUpConfiguration newBackUpConfiguration = JsonConvert.DeserializeObject<BackUpConfiguration>(res.Result.ToString());
+
+                    var updatedEntit = await _backUpConfigurationService.Update(newBackUpConfiguration, c => c.ConfigurationName == confName);
+                    
+                    if (updatedEntit != null)
+                    {
+                        _logger.LogInformation($"{newBackUpConfiguration.ConfigurationName} configuration updated.");
+                        _backUpScheduler.CancelTask(confName);
+                        _backUpScheduler.AddBackgroundTask(newBackUpConfiguration);
+                    }
+                    else
+                    {
+                        _logger.LogInformation($"Trying to add new {newBackUpConfiguration.ConfigurationName} configuration.");
+                        newBackUpConfiguration.Id = 0;
+                        await _unitOfWork.BackUpConfigurations.Create(newBackUpConfiguration);
+                        _backUpScheduler.AddBackgroundTask(newBackUpConfiguration);
+                    }
+                }
+                else
+                {
+                    _logger.LogError(res.ErrorMessages);
+                }
+            });
+        }
+
         private void SetConfigurationDeletedAction()
         {
 
             _hubConnection.On<string>("BackUpConfigurationDeleted", async (confName) =>
             {
-                _logger.LogInformation($"Deleting {confName} back up configuration!");
+                _logger.LogInformation($"Deleting {confName} back up configuration.");
                 _backUpScheduler.CancelTask(confName);
-                var deletedBc = await _backUpConfigurationService.Delete(bc => bc.ConfigurationName == confName);
+                await _backUpConfigurationService.Delete(bc => bc.ConfigurationName == confName);
+            });
+        }
+        private void SetAgentDeletedAction()
+        {
+
+            _hubConnection.On("AgentDeleted", () =>
+            {
+                _logger.LogInformation($"Agent deleted. Exiting program!");
+                Environment.Exit(0);
             });
         }
 
@@ -132,7 +182,7 @@ namespace BackUpAgent.Common.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogInformation($"Error al hacer ping al servidor: {ex.Message}");
+                    _logger.LogInformation($"Error al hacer ping al servidor: {ex.Message}.");
                     StartAsync();
                 }
             }, null, TimeSpan.Zero, TimeSpan.FromSeconds(10));

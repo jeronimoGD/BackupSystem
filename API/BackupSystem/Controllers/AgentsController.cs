@@ -1,9 +1,12 @@
 ﻿using AutoMapper;
 using BackupSystem.Common.Constants;
 using BackupSystem.Common.Interfaces.Services;
+using BackupSystem.Common.Interfaces.SignalR;
 using BackupSystem.Controllers.AplicationResponse;
+using BackupSystem.Data.Entities;
 using BackupSystem.DTO.AgentDTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BackupSystem.Controllers
@@ -15,11 +18,14 @@ namespace BackupSystem.Controllers
         private readonly IAgentsService _agentService;
         private APIResponse _response;
         private readonly IMapper _mapper;
-        public AgentsController(IMapper mapper, IAgentsService agentService)
+        private IAgentConfigurationHubService _agentConfigurationHubService;
+
+        public AgentsController(IMapper mapper, IAgentsService agentService, IAgentConfigurationHubService agentConfigurationHubService)
         {
             _response = new APIResponse();
             _mapper = mapper;
             _agentService = agentService;
+            _agentConfigurationHubService = agentConfigurationHubService;
         }
 
         [HttpGet("GetAgents", Name = "GetAgents")]
@@ -96,6 +102,13 @@ namespace BackupSystem.Controllers
         public async Task<IActionResult> DeleteAgentByName(string name)
         {
             _response = await _agentService.Delete(a => a.AgentName == name);
+           
+            if (_response.IsSuccesful)
+            {
+                Agent agent = (Agent)_response.Result;
+                _agentConfigurationHubService.NotifyAgentIsDeleted(agent.AgentKey);
+            }
+
             return MapToActionResult(this, _response);
         }
 

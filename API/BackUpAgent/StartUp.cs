@@ -34,11 +34,9 @@ namespace BackUpAgent
 
         public async Task StartAgentAsync()
         {
+            _logger.LogInformation($"Starting Agent with ID: {_appSettings.AgentConnectionKey}.");
 
-
-            _logger.LogInformation($"Starting Agent with ID: {_appSettings.AgentConnectionKey}");
-
-            _logger.LogInformation($"Logging to API with URL: {_appSettings.AgentManagerApiUrl}");
+            _logger.LogInformation($"Logging to API with URL: {_appSettings.AgentManagerApiUrl}.");
 
             APIResponse logingResponse = await _backUpSystemApiRequestService.APILoging<APIResponse>();
             
@@ -46,20 +44,20 @@ namespace BackUpAgent
             {
                 LoginResponseDTO logingsResDTO = JsonConvert.DeserializeObject<LoginResponseDTO>(logingResponse.Result.ToString());
                 _backUpSystemApiRequestService.SetSessionToken(logingsResDTO.Token);
-                _logger.LogInformation($"User {logingsResDTO} logged in!");
-                _logger.LogInformation($"Asking for authtorization!");
+                _logger.LogInformation($"User {logingsResDTO} logged in.");
+                _logger.LogInformation($"Asking for authtorization.");
 
                 APIResponse authorizationResponse = await _backUpSystemApiRequestService.GetAuthorizationToConnect<APIResponse>(Guid.Parse(_appSettings.AgentConnectionKey));
 
                 if (authorizationResponse.IsSuccesful)
                 {
-                    _logger.LogInformation($"Authorized to start agent!");
-                    _logger.LogInformation($"Asking for configuration!");
+                    _logger.LogInformation($"Authorized to start agent.");
+                    _logger.LogInformation($"Asking for configuration.");
                     APIResponse configurationResponse = await _backUpSystemApiRequestService.GetBackUpConfigurations<APIResponse>(Guid.Parse(_appSettings.AgentConnectionKey));
 
                     if (configurationResponse.IsSuccesful)
                     {
-                        _logger.LogInformation($"Configuration received");
+                        _logger.LogInformation($"Configuration received.");
                         try
                         {
                             configurationResponse.Result = JsonConvert.DeserializeObject<List<BackUpConfiguration>>(configurationResponse.Result.ToString());

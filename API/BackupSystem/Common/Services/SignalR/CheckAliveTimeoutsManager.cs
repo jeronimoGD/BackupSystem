@@ -1,12 +1,12 @@
-﻿using BackupSystem.Common.Interfaces.Hubs;
+﻿using BackupSystem.Common.Interfaces.SignalR;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
-namespace BackupSystem.Common.Hubs
+namespace BackupSystem.Common.Services.SignalR
 {
     public class TimerCallbackParams
     {
         public Guid clientKey { get; set; }
-        public string connectionId{ get; set; }
+        public string connectionId { get; set; }
     }
 
     public class CheckAliveTimeoutsManager : ICheckAliveTimeoutsManager

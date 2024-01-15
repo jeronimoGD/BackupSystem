@@ -1,21 +1,19 @@
 using BackupSystem.ApplicationSettings;
-using BackupSystem.Common.Hubs;
-using BackupSystem.Common.Interfaces.Hubs;
 using BackupSystem.Common.Interfaces.Repository;
 using BackupSystem.Common.Interfaces.Services;
+using BackupSystem.Common.Interfaces.SignalR;
 using BackupSystem.Common.Mappings;
 using BackupSystem.Common.Repository;
-using BackupSystem.Common.Services;
+using BackupSystem.Common.Services.DbManagementServices;
+using BackupSystem.Common.Services.SignalR;
 using BackupSystem.Data;
 using BackupSystem.Data.Entities;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Text;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

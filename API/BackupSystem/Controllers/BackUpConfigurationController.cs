@@ -1,17 +1,12 @@
 ﻿using AutoMapper;
 using BackupSystem.Common.Constants;
-using BackupSystem.Common.Hubs;
-using BackupSystem.Common.Interfaces.Hubs;
 using BackupSystem.Common.Interfaces.Services;
-using BackupSystem.Common.Services;
+using BackupSystem.Common.Interfaces.SignalR;
 using BackupSystem.Controllers.AplicationResponse;
 using BackupSystem.Data.Entities;
 using BackupSystem.DTO.BackUpConfigurationDTOs;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Logging;
 
 namespace BackupSystem.Controllers
 {
@@ -87,13 +82,14 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteBackUpConfigurationByName(string name)
         {
-            BackUpConfiguration conf = await _backUpConfigurationService.GetSingle(a => a.ConfigurationName == name);
-            _response = await _backUpConfigurationService.Delete(conf);
+            _response = await _backUpConfigurationService.Delete(c => c.ConfigurationName == name);
 
             if (_response.IsSuccesful)
             {
+                BackUpConfiguration conf = (BackUpConfiguration)_response.Result;
                 _agentConfigurationHubService.NotifyConfigurationDeleted(conf.AgentId, conf.ConfigurationName);
             }
+
             return MapToActionResult(this, _response);
         }
 
@@ -107,6 +103,13 @@ namespace BackupSystem.Controllers
         public async Task<IActionResult> UpdateBackUpConfiguration(string name, BackUpConfigurationUpdateDTO updateDTO)
         {
             _response = await _backUpConfigurationService.Update(updateDTO, u => u.ConfigurationName == name);
+
+            if (_response.IsSuccesful)
+            {
+                BackUpConfiguration conf = (BackUpConfiguration)_response.Result;
+                _agentConfigurationHubService.NotifyConfigurationUpdated(conf.AgentId, conf.ConfigurationName);
+            }
+
             return MapToActionResult(this, _response);
         }
     }

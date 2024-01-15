@@ -1,4 +1,4 @@
-﻿namespace BackupSystem.Common.Interfaces.Hubs
+﻿namespace BackupSystem.Common.Interfaces.SignalR
 {
     public interface ISignalRConnectionManager
     {

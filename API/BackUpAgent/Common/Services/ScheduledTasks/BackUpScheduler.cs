@@ -94,7 +94,7 @@ namespace BackUpAgent.Common.Services.ScheduledTasks
                 APIResponse res = await backUpSystemApiRequestService.RegisterBackUpHistoryRecord<APIResponse>(bcRecord);
                 if (!res.IsSuccesful)
                 {
-                    _logger.LogError($"Error al registrar el back up en el historial general {res.ErrorMessages}");
+                    _logger.LogError($"Error al registrar el back up en el historial general {res.ErrorMessages}.");
                 }
             }
         }

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using BackupSystem.Data.Enums;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -25,13 +26,5 @@ namespace BackupSystem.Data.Entities
 
         [ForeignKey("AgentId")]
         public Guid AgentId { get; set; }
-    }
-
-    public enum Periodicity
-    {
-        Daily,
-        Weekly,
-        TwoWeeks,
-        Monthly
     }
 }

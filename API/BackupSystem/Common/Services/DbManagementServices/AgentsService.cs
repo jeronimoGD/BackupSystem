@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
 
-namespace BackupSystem.Common.Services
+namespace BackupSystem.Common.Services.DbManagementServices
 {
     public class AgentsService : BaseEntityService<Agent>, IAgentsService
     {
@@ -45,7 +45,7 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"Agent already exists");
+                    response = APIResponse.NotFound($"Agent already exists.");
                 }
             }
             catch (Exception e)
@@ -71,7 +71,7 @@ namespace BackupSystem.Common.Services
                     }
                     else
                     {
-                        response = APIResponse.BadRequest(agent, $"Agent with this key is already connected");
+                        response = APIResponse.BadRequest(agent, $"Agent with this key is already connected.");
                     }
                 }
                 else

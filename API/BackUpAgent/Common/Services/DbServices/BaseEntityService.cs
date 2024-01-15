@@ -1,4 +1,5 @@
-﻿using AutoMapper.Internal;
+﻿using AutoMapper;
+using AutoMapper.Internal;
 using BackUpAgent.Common.Interfaces.DbServices;
 using BackUpAgent.Common.Interfaces.Repository;
 using BackupSystem.Common.Repository;
@@ -13,24 +14,24 @@ namespace BackUpAgent.Common.Services.DbServices
         private readonly IUnitOfWork _unitOfWork;
         private readonly IRepository<TEntity> _repository;
         private readonly ILogger<BaseEntityService<TEntity>> _logger;
-
-        public BaseEntityService(IUnitOfWork unitOfWork, ILogger<BaseEntityService<TEntity>> logger)
+        private readonly IMapper _mapper;
+        public BaseEntityService(IUnitOfWork unitOfWork, ILogger<BaseEntityService<TEntity>> logger, IMapper mapper)
         {
             _unitOfWork = unitOfWork;
 
+            PropertyInfo[] properties = _unitOfWork.GetType().GetProperties();
 
-            // Obtiene las propiedades del objeto
-            PropertyInfo[] LasPropiedades = _unitOfWork.GetType().GetProperties();
-
-            for (int i = 0; i < LasPropiedades.Length; i++)
+            for (int i = 0; i < properties.Length; i++)
             {
-                var type = LasPropiedades[i].GetMemberType();
+                var type = properties[i].GetMemberType();
                 if (type == typeof(IRepository<TEntity>))
                 {
-                    _repository = (IRepository<TEntity>?)LasPropiedades[i].GetValue(_unitOfWork);
+                    _repository = (IRepository<TEntity>?)properties[i].GetValue(_unitOfWork);
                 }
             }
+
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<TEntity>> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0,  params Expression<Func<TEntity, object>>[] includes)
@@ -43,7 +44,7 @@ namespace BackUpAgent.Common.Services.DbServices
 
                 if (entities == null)
                 {
-                    _logger.LogInformation("Not found.");
+                    _logger.LogWarning("Unable to get entity. Entity not found.");
                 }
             }
             catch (Exception e)
@@ -73,7 +74,7 @@ namespace BackUpAgent.Common.Services.DbServices
                 }
                 else
                 {
-                    _logger.LogWarning("Not found.");
+                    _logger.LogWarning("Unable to delete entity. Entity not found.");
                 }
             }
             catch (Exception e)
@@ -84,16 +85,32 @@ namespace BackUpAgent.Common.Services.DbServices
             return entity;
         }
 
-        public async Task Update(TEntity entity)
+        public async Task<TEntity> Update(TEntity entityChanges, Expression<Func<TEntity, bool>> filtro)
         {
+
+            TEntity entity = null;
+
             try
             {
-                await _repository.Update(entity);
+                var entityToUpdate = await GetSingle(filtro, true);
+                if (entityToUpdate != null)
+                {
+
+                    _mapper.Map(entityChanges, entityToUpdate);
+                    await _repository.Update(entityToUpdate);
+                    entity = entityToUpdate;
+                }
+                else
+                {
+                    _logger.LogError($"Unable to update entity. Entity not found.");
+                }
             }
             catch (Exception e)
             {
                 _logger.LogError(e.ToString());
             }
+
+            return entity;
         }
 
         public async Task Add(TEntity entity)

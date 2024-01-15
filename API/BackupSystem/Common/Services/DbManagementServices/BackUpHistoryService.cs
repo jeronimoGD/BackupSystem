@@ -10,7 +10,7 @@ using BackupSystem.DTO.BackUpHistoryDTOs;
 using Microsoft.Extensions.Options;
 using System.Linq.Expressions;
 
-namespace BackupSystem.Common.Services
+namespace BackupSystem.Common.Services.DbManagementServices
 {
     public class BackUpHistoryService : BaseEntityService<BackUpHistory>, IBackUpHistoryService
     {
@@ -33,14 +33,14 @@ namespace BackupSystem.Common.Services
             {
                 if (!await DoesEntityExists(a => a.BackUpName == createDto.BackUpName))
                 {
-                    BackUpHistory newBackUpRecord= _mapper.Map<BackUpHistory>(createDto);
+                    BackUpHistory newBackUpRecord = _mapper.Map<BackUpHistory>(createDto);
                     newBackUpRecord.BuckUpDate = DateTime.UtcNow;
                     await _unitOfWork.BackUpHistory.Create(newBackUpRecord);
                     response = APIResponse.Ok(newBackUpRecord);
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"BackUp with this name already exists");
+                    response = APIResponse.NotFound($"BackUp with this name already exists.");
                 }
             }
             catch (Exception e)

@@ -8,7 +8,7 @@ namespace BackUpAgent.Common.Interfaces.DbServices
         Task<IEnumerable<TEntity>> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0, params Expression<Func<TEntity, object>>[] includes);
         Task Add(TEntity entity);
         Task<TEntity> Delete(Expression<Func<TEntity, bool>> filtro);
-        Task Update(TEntity entity);
+        Task<TEntity> Update(TEntity entityChanges, Expression<Func<TEntity, bool>> filtro);
         Task<bool> DoesEntityExists(Expression<Func<TEntity, bool>> filtro);
     }
 }

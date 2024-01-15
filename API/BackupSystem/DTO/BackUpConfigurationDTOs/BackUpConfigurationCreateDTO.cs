@@ -1,5 +1,6 @@
 ﻿using BackupSystem.Common.Interfaces.Mapping;
 using BackupSystem.Data.Entities;
+using BackupSystem.Data.Enums;
 using BackupSystem.DTO.GenericDTOs;
 using System.ComponentModel.DataAnnotations;
 
@@ -22,13 +23,5 @@ namespace BackupSystem.DTO.BackUpConfigurationDTOs
         [Required]
         public int LastNBackUpsToStore { get; set; }
         public List<string>? ExcludedTablesList { get; set; }
-    }
-
-    public enum Periodicity
-    {
-        Daily,
-        Weekly,
-        TwoWeeks,
-        Monthly
     }
 }

@@ -16,7 +16,7 @@ using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Text;
 
-namespace BackupSystem.Common.Services
+namespace BackupSystem.Common.Services.DbManagementServices
 {
     public class UserService : BaseEntityService<ApplicationUser>, IUserService
     {
@@ -92,7 +92,7 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"No user found");
+                    response = APIResponse.NotFound($"No user found.");
                 }
             }
             catch (Exception e)
@@ -173,7 +173,7 @@ namespace BackupSystem.Common.Services
                 .Select(f => f.GetValue(null).ToString())
                 .ToArray();
 
-            foreach(string role in defaultRoles)
+            foreach (string role in defaultRoles)
             {
                 if (!_roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
                 {
@@ -198,7 +198,7 @@ namespace BackupSystem.Common.Services
                     Email = registerRequestDTO.Email
                 };
                 var user = await _userManager.FindByNameAsync(registerRequestDTO.UserName);
-                
+
                 if (user == null)
                 {
                     queryResponse = await _userManager.CreateAsync(newUser, registerRequestDTO.Password);
@@ -223,7 +223,7 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.BadRequest(registerRequestDTO, $"User {registerRequestDTO.UserName} already exists");
+                    response = APIResponse.BadRequest(registerRequestDTO, $"User {registerRequestDTO.UserName} already exists.");
                 }
 
             }

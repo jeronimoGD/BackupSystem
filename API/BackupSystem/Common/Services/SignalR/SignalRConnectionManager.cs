@@ -1,7 +1,7 @@
-﻿using BackupSystem.Common.Interfaces.Hubs;
+﻿using BackupSystem.Common.Interfaces.SignalR;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
-namespace BackupSystem.Common.Hubs
+namespace BackupSystem.Common.Services.SignalR
 {
     public class SignalRConnectionManager : ISignalRConnectionManager
     {

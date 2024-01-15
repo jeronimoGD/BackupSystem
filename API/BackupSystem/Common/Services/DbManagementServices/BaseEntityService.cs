@@ -13,7 +13,7 @@ using System.Formats.Tar;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace BackupSystem.Common.Services
+namespace BackupSystem.Common.Services.DbManagementServices
 {
     public class BaseEntityService<TEntity> : IBaseEntityService<TEntity> where TEntity : class
     {
@@ -39,13 +39,13 @@ namespace BackupSystem.Common.Services
             _mapper = mapper;
         }
 
-        public async Task<APIResponse> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0,  params Expression<Func<TEntity, object>>[] includes)
+        public async Task<APIResponse> Get(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, int amountOfEntities = 0, params Expression<Func<TEntity, object>>[] includes)
         {
             APIResponse response = new APIResponse();
 
             try
             {
-                IEnumerable<TEntity> entities = await _repository.Get(filtro, tracked, amountOfEntities,includes);
+                IEnumerable<TEntity> entities = await _repository.Get(filtro, tracked, amountOfEntities, includes);
 
                 if (entities != null && entities.Count() > 0)
                 {
@@ -73,7 +73,7 @@ namespace BackupSystem.Common.Services
 
         public async Task<TEntity> GetSingle(Expression<Func<TEntity, bool>> filtro = null, bool tracked = true, params Expression<Func<TEntity, object>>[] includes)
         {
-            IEnumerable<TEntity> entities = await _repository.Get(filtro, tracked, 1,includes);
+            IEnumerable<TEntity> entities = await _repository.Get(filtro, tracked, 1, includes);
             return entities.FirstOrDefault();
         }
 
@@ -108,7 +108,7 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"Not found");
+                    response = APIResponse.NotFound($"Unable to delete entity. Entity not found.");
                 }
             }
             catch (Exception e)
@@ -159,7 +159,7 @@ namespace BackupSystem.Common.Services
 
             try
             {
-                if(!await DoesEntityExists(filtro))
+                if (!await DoesEntityExists(filtro))
                 {
                     TEntity newEntity = _mapper.Map<TEntity>(createDTO);
                     await _repository.Create(newEntity);
@@ -167,9 +167,9 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"Entity already exists");
+                    response = APIResponse.NotFound($"Unable to create entity. Entity already exists.");
                 }
-               
+
             }
             catch (Exception e)
             {
@@ -195,7 +195,7 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"Entity not found");
+                    response = APIResponse.NotFound($"Unable to update entity. Entity not found.");
                 }
             }
             catch (Exception e)
@@ -208,7 +208,7 @@ namespace BackupSystem.Common.Services
 
         public async Task<bool> DoesEntityExists(Expression<Func<TEntity, bool>> filtro = null)
         {
-            return await this.GetSingle(filtro) != null;
+            return await GetSingle(filtro) != null;
         }
     }
 }

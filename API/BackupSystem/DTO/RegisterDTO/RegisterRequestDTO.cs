@@ -29,7 +29,7 @@ namespace BackupSystem.DTO.RegisterDTO
 
             if (value != null && !defaultRoles.Contains(value.ToString()))
             {
-                return new ValidationResult($"The introduced role is not valid. Valid roles: {string.Join(", ", defaultRoles)}");
+                return new ValidationResult($"The introduced role is not valid. Valid roles: {string.Join(", ", defaultRoles)}.");
             }
 
             return ValidationResult.Success;

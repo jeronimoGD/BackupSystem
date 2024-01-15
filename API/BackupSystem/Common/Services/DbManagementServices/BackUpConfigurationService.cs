@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using System.Linq.Expressions;
 using Newtonsoft.Json;
 
-namespace BackupSystem.Common.Services
+namespace BackupSystem.Common.Services.DbManagementServices
 {
     public class BackUpConfigurationService : BaseEntityService<BackUpConfiguration>, IBackUpConfigurationService
     {
@@ -37,7 +37,7 @@ namespace BackupSystem.Common.Services
                 }
                 else
                 {
-                    response = APIResponse.NotFound($"BackUp configuration with this name already exists");
+                    response = APIResponse.NotFound($"BackUp configuration with this name already exists.");
                 }
             }
             catch (Exception e)

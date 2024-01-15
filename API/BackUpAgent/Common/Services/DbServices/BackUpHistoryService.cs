@@ -11,8 +11,7 @@ namespace BackUpAgent.Common.Services.DbServices
 {
     public class BackUpHistoryService : BaseEntityService<BackUpHistory>, IBackUpHistoryService
     {
-        
-        public BackUpHistoryService(IUnitOfWork unitOfWork, ILogger<BackUpHistoryService> logger) : base(unitOfWork, logger)
+        public BackUpHistoryService(IUnitOfWork unitOfWork, ILogger<BackUpHistoryService> logger, IMapper mapper) : base(unitOfWork, logger, mapper)
         {
         }
     }

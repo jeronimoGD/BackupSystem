@@ -97,7 +97,7 @@ namespace BackUpAgent.Common.Services.Utils
                 catch (Exception ex)
                 {
                     created = false;
-                    _logger.LogError($"Error creating the directory {targetDirectoryPath}: {ex.Message}");
+                    _logger.LogError($"Error creating the directory {targetDirectoryPath}: {ex.Message}.");
                 }
             }
 

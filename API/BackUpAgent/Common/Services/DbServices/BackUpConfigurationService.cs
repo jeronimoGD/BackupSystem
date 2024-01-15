@@ -1,4 +1,5 @@
-﻿using BackUpAgent.Common.Interfaces.DbServices;
+﻿using AutoMapper;
+using BackUpAgent.Common.Interfaces.DbServices;
 using BackUpAgent.Common.Interfaces.Repository;
 using BackUpAgent.Data.Entities;
 using Microsoft.Extensions.Logging;
@@ -9,7 +10,8 @@ namespace BackUpAgent.Common.Services.DbServices
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<BackUpConfigurationService> _logger;
-        public BackUpConfigurationService(IUnitOfWork unitOfWork, ILogger<BackUpConfigurationService> logger) : base(unitOfWork, logger)
+
+        public BackUpConfigurationService(IUnitOfWork unitOfWork, ILogger<BackUpConfigurationService> logger, IMapper mapper) : base(unitOfWork, logger, mapper)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;

@@ -1,6 +1,6 @@
-﻿using BackupSystem.Common.Interfaces.Hubs;
-using BackupSystem.Common.Interfaces.Repository;
+﻿using BackupSystem.Common.Interfaces.Repository;
 using BackupSystem.Common.Interfaces.Services;
+using BackupSystem.Common.Interfaces.SignalR;
 using BackupSystem.Common.Services;
 using BackupSystem.Data.Entities;
 using BackupSystem.Data.Migrations;
@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
-namespace BackupSystem.Common.Hubs
+namespace BackupSystem.Common.Services.SignalR
 {
     public class AgentConfigurationHub : Hub
     {
@@ -41,7 +41,7 @@ namespace BackupSystem.Common.Hubs
                 _checkAliveTimeoutsManager.AddTimer(
                                           clientKey,
                                           state => TimerCallbackAsync((TimerCallbackParams)state),
-                                          new TimerCallbackParams { clientKey = clientKey, connectionId = connectionId},
+                                          new TimerCallbackParams { clientKey = clientKey, connectionId = connectionId },
                                           TimeSpan.FromSeconds(30),
                                           TimeSpan.FromSeconds(30)
                  );
