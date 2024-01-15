@@ -5,6 +5,8 @@ See the specifications of the system in the text file named NET BACKUP SYSTEM.pd
 ## PROJECT CONFIGURATION 
 To configure the system you should follow the next steps: 
 ### 1. API config: Fill the API appsettings.json to complete the fields betwen [] (SqlServer, DbName, SercretKey, Issuer, Audience)
+
+```json
 {
   "Logging": {
     "LogLevel": {
@@ -32,6 +34,8 @@ To configure the system you should follow the next steps:
 5. Add atleast one Agent. (Save the agent key for next step)
 
 ### 3. Agent config:  Fill the API appsettings.json to complete the fields betwen [] (SqlServer, DbName, AgentKey (From previous step), ApiURL, UserName (From previous step), Password (From previous step))
+
+```json
 {
   "Logging": {
     "LogLevel": {
@@ -65,7 +69,9 @@ To configure the system you should follow the next steps:
 1. Create a BackUpConfiguration using the AgentKey that you started.
 2. The API should send the back up configuration to the Agent and the agent should start the preriodic BackUpConfiguration foll9owing the desired behaviour. 
 
-Ex: {"id": 1,                                                                                                                
+Ex:
+```json
+ {"id": 1,                                                                                                                
     "configurationName": "[Name of the configuration (This will also give the name of the folder where the back ups will be stored)]",
     "sourceDbName": "[Source DB name (The back up will be aplied to this back up. Make sure it exists in your DbServer)]",
     "tarjetDbName": "[Name that the backups will have. It will be followed by the date of the back up (Ex: Example_yyyyMMdd-HHmmss)]",
