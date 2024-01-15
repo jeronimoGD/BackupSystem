@@ -31,7 +31,7 @@ To configure the system you should follow the next steps:
 3. Use the given token to authentificate and authorize the use of the API Enpoints with Bearer (Ex: Bearer exToken)
 5. Add atleast one Agent. (Save the agent key for next step)
 
-### Agent config:  Fill the API appsettings.json to complete the fields betwen [] (SqlServer, DbName, AgentKey (From previous step), ApiURL, UserName (From previous step), Password (From previous step))
+### 3. Agent config:  Fill the API appsettings.json to complete the fields betwen [] (SqlServer, DbName, AgentKey (From previous step), ApiURL, UserName (From previous step), Password (From previous step))
 {
   "Logging": {
     "LogLevel": {
