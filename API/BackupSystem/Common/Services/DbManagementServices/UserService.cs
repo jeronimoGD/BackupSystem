@@ -213,12 +213,12 @@ namespace BackupSystem.Common.Services.DbManagementServices
                         }
                         else
                         {
-                            response = APIResponse.BadRequest(registerRequestDTO, queryResponse.Errors.ToString());
+                            response = APIResponse.BadRequest(registerRequestDTO, queryResponse.Errors.FirstOrDefault().Description.ToString());
                         }
                     }
                     else
                     {
-                        response = APIResponse.BadRequest(registerRequestDTO, queryResponse.Errors.ToString());
+                        response = APIResponse.BadRequest(registerRequestDTO, queryResponse.Errors.FirstOrDefault().Description.ToString());
                     }
                 }
                 else

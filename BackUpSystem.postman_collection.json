@@ -1,0 +1,355 @@
+{
+	"info": {
+		"_postman_id": "744f68be-6139-4f16-a1a8-85d53daf2566",
+		"name": "BackUpSystem",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "30987708"
+	},
+	"item": [
+		{
+			"name": "UserControler",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "UserName",
+									"value": "Jero",
+									"type": "text"
+								},
+								{
+									"key": "Email",
+									"value": "jeroxx10@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "Password",
+									"value": "Password_123",
+									"type": "text"
+								},
+								{
+									"key": "Role",
+									"value": "Admin",
+									"type": "text"
+								}
+							]
+						},
+						"url": "https://localhost:7209/api/Users/RegisterUser"
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"userName\": \"Jero\",\r\n  \"password\": \"Password_123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "https://localhost:7209/api/Users/LoginUser"
+					},
+					"response": []
+				},
+				{
+					"name": "GetAllUsers",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIwODVmNzRlYy1lMmE1LTQ2MTgtYTYwMS1hM2Y2MjIxNmEyMDQiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzMjQ5MTYsImV4cCI6MTcwNTQxMTMxNiwiaWF0IjoxNzA1MzI0OTE2fQ.pbO3iOyGtQfnKT761M94uCKoinXq96gIJQewm4Y4Ofg"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "https://localhost:7209/api/Users/GetUsers"
+					},
+					"response": []
+				},
+				{
+					"name": "GetUSerByName",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteUserByName",
+					"request": {
+						"method": "DELETE",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateUserByName",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIwODVmNzRlYy1lMmE1LTQ2MTgtYTYwMS1hM2Y2MjIxNmEyMDQiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzMjQ5MTYsImV4cCI6MTcwNTQxMTMxNiwiaWF0IjoxNzA1MzI0OTE2fQ.pbO3iOyGtQfnKT761M94uCKoinXq96gIJQewm4Y4Ofg"
+							}
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"currentPassword\": \"Password_123\",\r\n  \"userName\": \"Jeronimo\",\r\n  \"email\": \"string\",\r\n  \"newPassword\": \"Password_123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://localhost:7209/api/Users/UpdateUserByName/?name=Jero",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7209",
+							"path": [
+								"api",
+								"Users",
+								"UpdateUserByName",
+								""
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "Jero"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AgentController",
+			"item": [
+				{
+					"name": "Get",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMzMyYThiYS05ZjJkLTRjOWMtOGVmMy0yNmQ2NDdjYjkxNTYiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzOTcyODksImV4cCI6MTcwNTQ4MzY4OSwiaWF0IjoxNzA1Mzk3Mjg5fQ.ZxogyuKCrqMrOaQbHzXEOn-stNnGYDWj-JM64u29IoU"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "https://localhost:7209/api/Agents/GetAgents"
+					},
+					"response": []
+				},
+				{
+					"name": "GetOnline",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "GetBackUpConfigurationByAgent",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "GetAuthorization",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "AddAgent",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMzMyYThiYS05ZjJkLTRjOWMtOGVmMy0yNmQ2NDdjYjkxNTYiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzOTcyODksImV4cCI6MTcwNTQ4MzY4OSwiaWF0IjoxNzA1Mzk3Mjg5fQ.ZxogyuKCrqMrOaQbHzXEOn-stNnGYDWj-JM64u29IoU"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "AgentName",
+									"value": "JeroAgent",
+									"type": "text"
+								}
+							]
+						},
+						"url": "https://localhost:7209/api/Agents/AddAgent"
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteAgent",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMzMyYThiYS05ZjJkLTRjOWMtOGVmMy0yNmQ2NDdjYjkxNTYiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzOTcyODksImV4cCI6MTcwNTQ4MzY4OSwiaWF0IjoxNzA1Mzk3Mjg5fQ.ZxogyuKCrqMrOaQbHzXEOn-stNnGYDWj-JM64u29IoU"
+							}
+						},
+						"method": "DELETE",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateAgent",
+					"request": {
+						"method": "PUT",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "BackUpConfigurationController",
+			"item": [
+				{
+					"name": "Get",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "AddConfiguration",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMzMyYThiYS05ZjJkLTRjOWMtOGVmMy0yNmQ2NDdjYjkxNTYiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzOTcyODksImV4cCI6MTcwNTQ4MzY4OSwiaWF0IjoxNzA1Mzk3Mjg5fQ.ZxogyuKCrqMrOaQbHzXEOn-stNnGYDWj-JM64u29IoU"
+							}
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n  \"configurationName\": \"JeroConf\",\r\n  \"agentId\": \"7c605857-3d22-478b-9dea-dd9d4ec09d20\",\r\n  \"tarjetDbName\": \"TargetDb\",\r\n  \"sourceDbName\": \"SourceDb\",\r\n  \"periodicity\": 0,\r\n  \"createCloudBackUp\": false,\r\n  \"lastNBackUpsToStore\": 4,\r\n  \"excludedTablesList\": [\r\n    \"string\"\r\n  ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "https://localhost:7209/api/BackUpConfiguration/AddBackUpConfiguration"
+					},
+					"response": []
+				},
+				{
+					"name": "DeleteConf",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMzMyYThiYS05ZjJkLTRjOWMtOGVmMy0yNmQ2NDdjYjkxNTYiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzOTcyODksImV4cCI6MTcwNTQ4MzY4OSwiaWF0IjoxNzA1Mzk3Mjg5fQ.ZxogyuKCrqMrOaQbHzXEOn-stNnGYDWj-JM64u29IoU"
+							}
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "https://localhost:7209/api/BackUpConfiguration/DeleteBackUpConfigurationByName/?name=JeroConf",
+							"protocol": "https",
+							"host": [
+								"localhost"
+							],
+							"port": "7209",
+							"path": [
+								"api",
+								"BackUpConfiguration",
+								"DeleteBackUpConfigurationByName",
+								""
+							],
+							"query": [
+								{
+									"key": "name",
+									"value": "JeroConf"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UpdateConf",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "BackUpHistoryController",
+			"item": [
+				{
+					"name": "Get",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "GetAll",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": {
+								"token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1laWQiOiIxMzMyYThiYS05ZjJkLTRjOWMtOGVmMy0yNmQ2NDdjYjkxNTYiLCJyb2xlIjoiQWRtaW4iLCJuYmYiOjE3MDUzOTcyODksImV4cCI6MTcwNTQ4MzY4OSwiaWF0IjoxNzA1Mzk3Mjg5fQ.ZxogyuKCrqMrOaQbHzXEOn-stNnGYDWj-JM64u29IoU"
+							}
+						},
+						"method": "GET",
+						"header": [],
+						"url": "https://localhost:7209/api/BackUpHistory/GetBackUpHistory"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

@@ -60,7 +60,7 @@ namespace BackupSystem.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> AddBackUpConfiguration([FromForm] BackUpConfigurationCreateDTO createDTO)
+        public async Task<IActionResult> AddBackUpConfiguration([FromBody] BackUpConfigurationCreateDTO createDTO)
         {
             _response = await _backUpConfigurationService.AddBackUpConfiguration(createDTO);
             

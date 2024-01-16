@@ -67,7 +67,7 @@ namespace BackupSystem.Controllers
             return MapToActionResult(this, _response);
         }
 
-        [HttpPost("RegisterUser", Name = "RegisterUserEnd")]
+        [HttpPost("RegisterUser", Name = "RegisterUser")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
